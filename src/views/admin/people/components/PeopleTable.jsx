@@ -46,20 +46,37 @@ const PeopleTable = () => {
   };
   const initialFormData = {
     nature: "",
+    // contractorId: "",
     workEmail: "",
+    personalEmail: "",
+    billingEmail: "",
     mobile: "",
-    password: "",
     displayName: "",
+    officialName: "",
     department: "",
     employeeId: "",
+    commissionOnInvoice: 0,
     hourlyRate: 0,
     tdsRate: 0,
+    businessName: "",
+    GSTIN: "",
     gstRate: 0,
     pan: "",
     bankAccountNumber: "",
     ifscCode: "",
     paymentChannel: "",
     paymentMode: "",
+    panUrl: "",
+    aadhaarFrontUrl: "",
+    aadhaarBackUrl: "",
+    passportUrl: "",
+    agreementUrl: "",
+    tncUrl: "",
+    gstCertificateUrl: "",
+    businessNameProofUrl: "",
+    bankStatementFolderUrl: "",
+    invoiceFolderUrl: "",
+    form16FolderUrl: ""
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -73,11 +90,10 @@ const PeopleTable = () => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-
-    const numericFields = ["hourlyRate", "tdsRate", "gstRate"];
+    const numericFields = ["hourlyRate", "tdsRate", "gstRate", "commissionOnInvoice"];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
-
+  
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: parsedValue,
@@ -86,18 +102,21 @@ const PeopleTable = () => {
 
   const handleUpdateChange = (event) => {
     const { name, value } = event.target;
-    const numericFields = ["hourlyRate", "tdsRate", "gstRate"];
+    const numericFields = ["hourlyRate", "tdsRate", "gstRate", "commissionOnInvoice"];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
-    setIdData({ ...idData, [name]: parsedValue });
+  
+    setIdData((prevIdData) => ({
+      ...prevIdData,
+      [name]: parsedValue,
+    }));
   };
 
   const handleSubmit = (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log(formData);
-
-    // Send data to the API endpoint
+    console.log("cccc",formData);
+    
     fetch(`${process.env.REACT_APP_API_URL}/people/create`, {
       method: "POST",
       headers: {
@@ -240,9 +259,7 @@ const PeopleTable = () => {
   const sendUpdate = (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log(idData);
-
-    // Send data to the API endpoint
+    
     fetch(`${process.env.REACT_APP_API_URL}/people/${selectedId}`, {
       method: "PUT",
       headers: {

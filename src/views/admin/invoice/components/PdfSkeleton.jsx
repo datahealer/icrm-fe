@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { MdOutlineQrCode2 } from "react-icons/md";
-import Spinner from "./Spinner";
+import Spinner from "views/admin/client/components/Spinner";
 
 export default function PdfSkeleton({ onPrintComplete, data }) {
   const componentRef = useRef();

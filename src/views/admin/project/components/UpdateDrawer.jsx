@@ -178,7 +178,7 @@ const UpdateDrawer = ({
                 Choose Client
               </option>
               {clients.map((client) => (
-                <option key={client.id} value={client.primaryContactPerson}>
+                <option key={client._id} value={client._id}>
                   {client.primaryContactPerson}
                 </option>
               ))}

@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import Pagination from "./Pagination";
-import InvoiceDrawer from "./InvoiceDrawer";
 import { MdDelete, MdDownload } from "react-icons/md";
 import { useAuthContext } from "hooks/useAuthContext";
-import Spinner from "./Spinner";
+import Spinner from "views/admin/client/components/Spinner";
 import DeleteInvoiceConfirm from "./DeleteInvoiceConfirm";
-import UpdateDrawer from "./UpdateDrawer";
 import DownloadInvoiceConfirm from "./DownloadInvoiceConfirm";
 import PdfSkeleton from "./PdfSkeleton";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaMinus } from "react-icons/fa";
-import CreateInvoice from "../createInvoice/components/CreateInvoice.jsx";
+import CreateInvoice from "./CreateInvoice.jsx";
+import { useInvoiceContext } from "context/InvoiceContext";
 
 const InvoiceTable = () => {
   const [filter, setFilter] = useState("");
@@ -19,6 +18,7 @@ const InvoiceTable = () => {
   const [isOpencreate, setIsOpencreate] = useState(false);
 
   const [showComponent, setShowComponent] = useState(false);
+  const [showUpdateComponent, setshowUpdateComponent] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,9 +27,11 @@ const InvoiceTable = () => {
     setShowComponent(true);
   };
 
-  const handleAddNewInvoice = () => {
-    navigate("/admin/createinvoice");
-  };
+  // const handleAddNewInvoice = () => {
+  //   navigate("/admin/createinvoice");
+  // };
+  const { handleAddNewInvoice } = useInvoiceContext();  
+
 
   const [data, setData] = useState([
     { id: 1, task: "Task 1", completed: false },
@@ -47,12 +49,14 @@ const InvoiceTable = () => {
   const [submitted, setSubmitted] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [clients, setClients] = useState([]);
+  console.log("clientdev",clients )
   const [projects, setProjects] = useState([]);
   const [people, setPeople] = useState([]);
   const [managers, setManagers] = useState([]);
   const [clientIds, setClientIds] = useState([]);
   const [selectedClientID, setSelectedClientID] = useState(null);
   const [invoices, setInvoices] = useState([]);
+
   const [invoiceData, setInvoiceData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUpdateDrawerOpen, setIsUpdateDrawerOpen] = useState(false);
@@ -175,10 +179,6 @@ const InvoiceTable = () => {
     setIsOpen(true);
   };
 
-  const handleUpdateDrawerToggle = () => {
-    setIsUpdateDrawerOpen(!isUpdateDrawerOpen);
-    setIsOpen(true);
-  };
 
   const handleUpdateClickOutside = (event) => {
     if (updateRef.current && !updateRef.current.contains(event.target)) {
@@ -256,11 +256,16 @@ const InvoiceTable = () => {
         setSubmitted((prevSubmitted) => !prevSubmitted);
         setSpin(false);
         setFormData(initialFormData);
+        console.log();
       })
       .catch((error) => {
         console.error("Error:", error);
       });
   };
+
+  useEffect(() => {
+    console.log("Heyy", formData);
+  });
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/client/`)
@@ -275,6 +280,8 @@ const InvoiceTable = () => {
       });
   }, []);
 
+  console.log("client ==>",clients)
+
   useEffect(() => {
     setSpin(true);
     fetch(`${process.env.REACT_APP_API_URL}/invoices`, {
@@ -283,6 +290,7 @@ const InvoiceTable = () => {
       .then((response) => response.json())
       .then((data) => {
         setInvoices(data.data.invoices);
+        console.log("dev. resp",data.data)
         setSpin(false); // Assuming the API returns invoices in data.data.invoices
       })
       .catch((error) => {
@@ -291,7 +299,6 @@ const InvoiceTable = () => {
   }, [deleted, submitted, updated]);
 
   useEffect(() => {
-
     const fetchProjects = async () => {
       try {
         const response = await fetch(
@@ -310,9 +317,7 @@ const InvoiceTable = () => {
 
   useEffect(() => {
     console.log("Projects updated", projects);
-  }, [projects])
-  
-
+  }, [projects]);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/people/`)
@@ -361,6 +366,7 @@ const InvoiceTable = () => {
       const result = await response.json();
       setDownloadData(result.data);
       console.log("Result Data", result);
+      console.log(user.user.email);
     } catch (error) {
       console.error("Error fetching download data:", error);
     }
@@ -436,78 +442,13 @@ const InvoiceTable = () => {
     paymentChannel: "WISE",
   });
 
+  const { handleEditInvoice } = useInvoiceContext();
+
   const handleUpdate = async (event, id) => {
     event.preventDefault();
-    console.log("Handle Update Called", idData);
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/invoices/${id}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-      // const data = apiData.data;
-      console.log("handleUpdate Data:", data);
-      // console.log("api Data:", apiData);
-
-      setIdData({
-        clientId: data.data.invoice.clientId || "",
-        projectId: data.data.invoice.projectId || "",
-        number: data.data.invoice.number || "",
-        poNumber: data.data.invoice.poNumber || "",
-        date: data.data.invoice.date || "",
-        serviceFromDate: data.data.invoice.serviceFromDate || "",
-        serviceToDate: data.data.invoice.serviceToDate || "",
-        mileStones: data.data.invoice.mileStones || "",
-        dueDate: data.data.invoice.dueDate || "",
-        preparedBy: data.data.invoice.preparedBy || "",
-        reviewedBy: data.data.invoice.reviewedBy || "",
-
-        services: [
-          {
-            name: data.data.invoice.services?.[0]?.name || "",
-            description: data.data.invoice.services?.[0]?.description || "",
-            hours: data.data.invoice.services?.[0]?.hours || "",
-            rate: data.data.invoice.services?.[0]?.rate || "",
-            mileStone: data.data.invoice.services?.[0]?.mileStone || "",
-            discountPercent:
-              data.data.invoice.services?.[0]?.discountPercent || "",
-            discountAmount:
-              data.data.invoice.services?.[0]?.discountAmount || "",
-            SAC: data.data.invoice.services?.[0]?.SAC || "998311",
-            timeTrackerReportUrl:
-              data.data.invoice.services?.[0]?.timeTrackerReportUrl || "",
-            taxableAmount: data.data.invoice.services?.[0]?.taxableAmount || "",
-            sgstRate: data.data.invoice.services?.[0]?.sgstRate || "Nil",
-            sgstAmount: data.data.invoice.services?.[0]?.sgstAmount || "",
-            cgstRate: data.data.invoice.services?.[0]?.cgstRate || "Nil",
-            cgstAmount: data.data.invoice.services?.[0]?.cgstAmount || "",
-            igstRate: data.data.invoice.services?.[0]?.igstRate || "Nil",
-            igstAmount: data.data.invoice.services?.[0]?.igstAmount || "",
-          },
-        ],
-        adjustments: data.adjustments || [
-          {
-            name: data.data.invoice.adjustments?.[0]?.name || "",
-            amount: data.data.invoice.adjustments?.[0]?.amount || "",
-          },
-        ],
-        status: data.data.invoice.status || "DRAFT",
-        paidAmount: data.data.invoice.paidAmount || "",
-        forgivenAmount: data.data.invoice.forgivenAmount || "",
-        paidAmountINR: data.data.invoice.paidAmountINR || "",
-        forgivenReason: data.data.invoice.forgivenReason || "",
-        cancellationReason: data.data.invoice.cancellationReason || "",
-      });
-      setSelectedId(id);
-      console.log("Afterupdate Called", idData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    await handleEditInvoice(id);
   };
-
+  
   useEffect(() => {
     setSpin(true);
 
@@ -536,6 +477,8 @@ const InvoiceTable = () => {
     updatedIndexOfFirstItem,
     updatedIndexOfLastItem
   );
+
+
 
   const drawerRef = useRef(null);
 
@@ -601,6 +544,10 @@ const InvoiceTable = () => {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+
+  useEffect(() => {
+    console.log("Heyy Priyanshu", formData,formData.clientName);
+  }, [formData]);
 
   return (
     <div className="min-h-fit bg-white">
@@ -678,14 +625,12 @@ const InvoiceTable = () => {
                 ADD NEW INVOICE
               </button>
             </div>
-    
-            {showComponent && (
-              <CreateInvoice />
-            )}
+
+            {showComponent && <CreateInvoice />}
 
             {/* Update Drawer */}
-            <UpdateDrawer
-              isUpdateDrawerOpen={isUpdateDrawerOpen}
+            {/* <UpdateDrawer
+              isUpdateDrawerOpen={isUpdateDrawerOpen}onDataChange={handleDataChange}
               updateRef={updateRef}
               idData={idData}
               handleUpdateDrawerToggle={handleUpdateDrawerToggle}
@@ -697,7 +642,7 @@ const InvoiceTable = () => {
               managers={managers}
               projects={projects}
               selectedId={selectedId}
-            />
+            /> */}
           </div>
         </div>
         {showModal && (
@@ -760,17 +705,27 @@ const InvoiceTable = () => {
           </thead>
           <tbody>
             {updatedCurrentItems?.map((row, index) => {
-              const client = clients.find(
-                (client) => client._id === row.clientId
+              {console.log("updatedCurrentItems",updatedCurrentItems)}
+              const client = clients?.find(
+                (client) => client?._id === row?.clientId
               );
+
+              console.log("client.primaryContactPerson",client)
               const primaryContactPerson = client
-                ? client.primaryContactPerson
+                ? client?.primaryContactPerson
                 : "Unknown";
 
               const project = projects.find(
                 (project) => project._id === row.projectId
               );
-              const projectName = project ? project.name : "Unknown";
+              const projectName = project ? project?.name : "Unknown";
+
+              console.log("project.name is",project?.name)
+
+              // Use clientName from formData
+              // const clientName = formData.clientName || primaryContactPerson;
+              // console.log("clientName is",primaryContactPerson)
+
               if (
                 !searchQuery.trim() ||
                 primaryContactPerson
@@ -796,8 +751,7 @@ const InvoiceTable = () => {
                       scope="row"
                       className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                     >
-                      {/* {row.firstname+" "+row.lastname} */}
-                      {primaryContactPerson}
+                   {primaryContactPerson}
                     </th>
                     <td className="px-6 py-4">{projectName}</td>
                     <td className="px-6 py-4">
@@ -806,7 +760,6 @@ const InvoiceTable = () => {
                     <td className="px-6 py-4">
                       {writeDate(row.serviceToDate)}
                     </td>
-                    {/* <td className="px-6 py-4">{row.workEmail}</td> */}
                     <td className="px-6 py-4">
                       <div className="flex flex-row items-center gap-3">
                         <a
@@ -814,7 +767,6 @@ const InvoiceTable = () => {
                           className="font-medium text-blue-600 hover:underline dark:text-blue-500"
                           onClick={(event) => {
                             handleUpdate(event, row._id);
-                            handleUpdateDrawerToggle();
                           }}
                         >
                           Edit

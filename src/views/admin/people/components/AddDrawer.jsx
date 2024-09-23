@@ -393,6 +393,177 @@ const AddDrawer = ({
                 <option value="Cash">Cash</option>
               </select>
             </div>
+            <div className="mb-6">
+              <label
+                htmlFor="aadhaarFrontUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Aadhaar Front URL
+              </label>
+              <input
+                type="url"
+                id="aadhaarFrontUrl"
+                name="aadhaarFrontUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of Aadhaar front image"
+                value={formData.aadhaarFrontUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="aadhaarBackUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Aadhaar Back URL
+              </label>
+              <input
+                type="url"
+                id="aadhaarBackUrl"
+                name="aadhaarBackUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of Aadhaar back image"
+                value={formData.aadhaarBackUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="passportUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Passport URL
+              </label>
+              <input
+                type="url"
+                id="passportUrl"
+                name="passportUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of passport image"
+                value={formData.passportUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="agreementUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Agreement URL
+              </label>
+              <input
+                type="url"
+                id="agreementUrl"
+                name="agreementUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of agreement document"
+                value={formData.agreementUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="tncUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Terms & Conditions URL
+              </label>
+              <input
+                type="url"
+                id="tncUrl"
+                name="tncUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of terms and conditions"
+                value={formData.tncUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="gstCertificateUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                GST Certificate URL
+              </label>
+              <input
+                type="url"
+                id="gstCertificateUrl"
+                name="gstCertificateUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of GST certificate"
+                value={formData.gstCertificateUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="businessNameProofUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Business Name Proof URL
+              </label>
+              <input
+                type="url"
+                id="businessNameProofUrl"
+                name="businessNameProofUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of business name proof"
+                value={formData.businessNameProofUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="bankStatementFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Bank Statement Folder URL
+              </label>
+              <input
+                type="url"
+                id="bankStatementFolderUrl"
+                name="bankStatementFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of bank statement folder"
+                value={formData.bankStatementFolderUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="invoiceFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Invoice Folder URL
+              </label>
+              <input
+                type="url"
+                id="invoiceFolderUrl"
+                name="invoiceFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of invoice folder"
+                value={formData.invoiceFolderUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="form16FolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Form 16 Folder URL
+              </label>
+              <input
+                type="url"
+                id="form16FolderUrl"
+                name="form16FolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="URL of Form 16 folder"
+                value={formData.form16FolderUrl}
+                onChange={handleInputChange}
+              />
+            </div>
 
             <button
               type="submit"

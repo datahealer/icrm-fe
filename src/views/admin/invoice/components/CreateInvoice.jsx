@@ -4,8 +4,9 @@ import { GrGallery } from "react-icons/gr";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { useProjects } from "hooks/useProjects";
 import { useAuthContext } from "hooks/useAuthContext";
+import { useNavigate } from "react-router-dom";
 
-const AddInvoice = () => {
+const CreateInvoice = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showmodalsender, setshowmodalsender] = useState(false);
   const [showmodalrecipeint, setshowmodalrecipent] = useState(false);
@@ -19,6 +20,8 @@ const AddInvoice = () => {
 
   const { user } = useAuthContext();
 
+  const navigate = useNavigate();
+
   const [isOpenaccor, setIsOpenaccor] = useState(false);
 
   const initialFormData = {
@@ -30,15 +33,13 @@ const AddInvoice = () => {
     serviceToDate: "",
     mileStones: [],
     dueDate: "",
-    preparedBy: "",
-    reviewedBy: [],
+    preparedBy: user.user._id,
+    reviewedBy: user.user._id,
 
     services: [
       {
         name: "",
         description: "",
-        // fromDate: "",
-        // toDate: "",
         mileStone: "",
         hours: "",
         rate: "",
@@ -72,6 +73,9 @@ const AddInvoice = () => {
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [clientName, setClientName] = useState("");
+
+  const [clientFromProject, setclientFromProject] = useState("");
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -80,7 +84,61 @@ const AddInvoice = () => {
       ...prevFormData,
       [name]: value,
     }));
+
+    // Fetch clientName when projectId is selected
+    if (name === "projectId" && value) {
+      fetchClientName(value);
+    }
   };
+
+  useEffect(() => {
+    try {
+      const response = fetch(
+        `${process.env.REACT_APP_API_URL}/project/projID/663cc9b9a265d05771f744a3`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = response.json();
+      console.log("Fetch ClientName When projectId is selected", data);
+    } catch (error) {}
+  });
+
+  const fetchClientName = async (projectId) => {
+    console.log("Fetch ClientName When projectId is selected", projectId);
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/project/projID/${projectId}`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      console.log("Client Name in fetchClientName:", data,data?.customerDisplayName);
+      setclientFromProject(data.customerDisplayName);
+      setFormData((prevFormData) => {
+        const updatedFormData = {
+          ...prevFormData,
+          clientName: data.customerDisplayName,
+        };
+        console.log("Updated formData:", updatedFormData);
+        return updatedFormData;
+      });
+    } catch (error) {
+      console.error("Error fetching client name:", error);
+    }
+  };
+
+  useEffect(() => {
+    const projectId = "your_project_id"; // Replace with your actual projectId
+    fetchClientName(projectId);
+  }, []); // Empty dependency array to run only once on mount
+
+  // useEffect to log the clientName when it changes
+  useEffect(() => {
+    console.log("Client Name in state:", clientFromProject);
+  }, [clientName]); // Dependency array with clientName to run this effect when clientName changes
 
   const handleServiceChange = (index, field, value) => {
     const updatedServices = formData.services.map((service, i) => {
@@ -121,10 +179,6 @@ const AddInvoice = () => {
     filterData(searchTerm);
   };
 
-  // const toggleDropdown = () => {
-  //   setShowDropdown(!showDropdown);
-  // };
-
   const filterData = (searchTerm) => {
     const filtered = data.filter((item) =>
       item.toLowerCase().includes(searchTerm.toLowerCase())
@@ -136,7 +190,6 @@ const AddInvoice = () => {
     setSearchTerm(value);
     setShowDropdown(false);
   };
-
   // Invoice Drawer
 
   const toggleAccordion = () => {
@@ -163,7 +216,13 @@ const AddInvoice = () => {
   const handleSubmit = (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log(formData);
+
+    const dataToSubmit = {
+      ...formData,
+      clientName: clientFromProject, // Ensure clientName is included in the data being sent
+    };
+
+    console.log("Handle Submit with clientName", dataToSubmit);
 
     // Send data to the API endpoint
     fetch(`${process.env.REACT_APP_API_URL}/invoices`, {
@@ -172,7 +231,7 @@ const AddInvoice = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${user.token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(dataToSubmit),
     })
       .then((response) => {
         if (!response.ok) {
@@ -187,6 +246,8 @@ const AddInvoice = () => {
         setSubmitted((prevSubmitted) => !prevSubmitted);
         setSpin(false);
         setFormData(initialFormData);
+        console.log("Form Data Priyanshu", formData);
+        navigate("/admin/invoice");
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -225,18 +286,11 @@ const AddInvoice = () => {
 
         {/* 2nd col */}
         <div>
-
           <div className=" mb-6 mt-4 w-full">
-            {/* <label
-              htmlFor="status"
-              className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >
-              <span className="text-lg text-red-500">*</span>Project Name
-            </label> */}
             <select
               id="projectId"
               name="projectId"
-              className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-full rounded-lg border border-gray-200 bg-gray-200 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               required
               value={formData.projectId}
               onChange={handleInputChange}
@@ -245,12 +299,15 @@ const AddInvoice = () => {
                 Choose Project
               </option>
               {projects.map((project) => (
-                <option key={project._id} value={project._id}>
+                <option
+                  key={project._id}
+                  value={project._id}
+                  className="bg-white"
+                >
                   {project.name}
                 </option>
               ))}
             </select>
-
           </div>
         </div>
         {/* 3rd col */}
@@ -280,21 +337,6 @@ const AddInvoice = () => {
           />
         </div>
       </div>
-      {/* 3rd row */}
-      {/* <div className="mt-6 flex w-full items-center justify-end gap-4 pr-4">
-        <div className="font-bold text-gray-600">Due date</div>
-        <div>
-          <input
-            type="date"
-            id="serviceFromDate"
-            name="serviceFromDate"
-            className="border border-gray-300 bg-gray-200 p-1"
-            value={formData.serviceFromDate}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div> */}
       {/* 4th row */}
       <div className="mx-2 mt-12 flex ">
         <div className="relative flex items-start justify-between  gap-36 rounded-lg p-4">
@@ -346,7 +388,7 @@ const AddInvoice = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="mt-4 block text-sm font-medium text-gray-700">
                           Description
                         </label>
                         <input
@@ -365,11 +407,11 @@ const AddInvoice = () => {
                           }
                         />
                       </div>
-                      <div className="flex w-full gap-4">
+                      <div className="mt-4 flex w-full gap-4">
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>Name
                           </label>
@@ -377,7 +419,7 @@ const AddInvoice = () => {
                             type="text"
                             id="name"
                             name="name"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Name"
                             value={service.name}
                             onChange={(e) =>
@@ -389,7 +431,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>
                             Milestones
@@ -398,7 +440,7 @@ const AddInvoice = () => {
                             type="text"
                             id="mileStone"
                             name="mileStone"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Milestones"
                             value={service.mileStone}
                             onChange={(e) =>
@@ -435,7 +477,7 @@ const AddInvoice = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="mt-4 block text-sm font-medium text-gray-700">
                           Rate
                         </label>
                         <input
@@ -450,7 +492,7 @@ const AddInvoice = () => {
                           }
                         />
                       </div>
-                      <div className="flex space-x-4">
+                      <div className="mt-4 flex space-x-4">
                         <div className="w-1/2">
                           <label className="block text-sm font-medium text-gray-700">
                             Discount Percent
@@ -495,18 +537,18 @@ const AddInvoice = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center">
+                      <div className="mt-4 flex items-center">
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="defaultAllocation"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>SAC
                           </label>
                           <select
                             id="SAC"
                             name="SAC"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             value={service.SAC}
                             onChange={(e) =>
                               handleServiceChange(index, "SAC", e.target.value)
@@ -536,7 +578,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>Time
                             tracker report URL
@@ -545,7 +587,7 @@ const AddInvoice = () => {
                             type="text"
                             id="timeTrackerReportUrl"
                             name="timeTrackerReportUrl"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Time tracker
                     report URL"
                             value={service.timeTrackerReportUrl}
@@ -561,7 +603,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>
                             Taxable Amount
@@ -570,7 +612,7 @@ const AddInvoice = () => {
                             type="number"
                             id="taxableAmount"
                             name="taxableAmount"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Taxable
                     Amount"
                             value={service.taxableAmount}
@@ -588,7 +630,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="defaultAllocation"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>SGST
                             Rate
@@ -596,7 +638,7 @@ const AddInvoice = () => {
                           <select
                             id="sgstRate"
                             name="sgstRate"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300  p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             value={service.sgstRate}
                             onChange={(e) =>
                               handleServiceChange(
@@ -617,7 +659,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>SGST
                             Amount
@@ -626,7 +668,7 @@ const AddInvoice = () => {
                             type="number"
                             id="sgstAmount"
                             name="sgstAmount"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="SGST Amount"
                             value={service.sgstAmount}
                             onChange={(e) =>
@@ -643,7 +685,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="defaultAllocation"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>CGST
                             Rate
@@ -651,7 +693,7 @@ const AddInvoice = () => {
                           <select
                             id="cgstRate"
                             name="cgstRate"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             value={service.cgstRate}
                             onChange={(e) =>
                               handleServiceChange(
@@ -672,7 +714,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>CGST
                             Amount
@@ -681,7 +723,7 @@ const AddInvoice = () => {
                             type="number"
                             id="cgstAmount"
                             name="cgstAmount"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Project Name"
                             value={service.cgstAmount}
                             onChange={(e) =>
@@ -698,7 +740,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="defaultAllocation"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>IGST
                             Rate
@@ -706,7 +748,7 @@ const AddInvoice = () => {
                           <select
                             id="igstRate"
                             name="igstRate"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300  p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             value={service.igstRate}
                             onChange={(e) =>
                               handleServiceChange(
@@ -727,7 +769,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>IGST
                             Amount
@@ -736,7 +778,7 @@ const AddInvoice = () => {
                             type="number"
                             id="igstAmount"
                             name="igstAmount"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="IGST Amount"
                             value={service.igstAmount}
                             onChange={(e) =>
@@ -751,13 +793,6 @@ const AddInvoice = () => {
                       </div>
                     </div>
                   ))}
-
-                  {/* <button
-                    type="submit"
-                    className="w-full rounded-md bg-blue-600 p-2 text-white"
-                  >
-                    Set sender data
-                  </button> */}
                 </form>
               </div>
             </div>
@@ -769,10 +804,8 @@ const AddInvoice = () => {
             onClick={() => setshowmodalrecipent(true)}
           >
             <div className="flex flex-col">
-              {/* <h1 className="font-semibold">Bill to</h1> */}
               <FaUser className="h-6 w-6 text-gray-700" />
             </div>
-
             <div className="flex flex-col justify-start">
               <div className="font-semibold text-gray-700">Adjustments</div>
               <div className="text-sm text-gray-500">Adjustments details</div>
@@ -797,7 +830,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>Name
                           </label>
@@ -805,7 +838,7 @@ const AddInvoice = () => {
                             type="text"
                             id="name"
                             name="name"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Name"
                             value={adjustment.name}
                             onChange={(e) =>
@@ -821,7 +854,7 @@ const AddInvoice = () => {
                         <div className="mb-6 w-[48%]">
                           <label
                             htmlFor="projectName"
-                            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                            className="mb-2 block text-sm font-medium text-gray-700 dark:text-white"
                           >
                             <span className="text-lg text-red-500">*</span>
                             Amount
@@ -830,7 +863,7 @@ const AddInvoice = () => {
                             type="number"
                             id="amount"
                             name="amount"
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                             placeholder="Amount"
                             value={adjustment.amount}
                             onChange={(e) =>
@@ -846,12 +879,6 @@ const AddInvoice = () => {
                       </div>
                     </div>
                   ))}
-                  {/* <button
-                    type="submit"
-                    className="w-full rounded-md bg-blue-600 p-2 text-white"
-                  >
-                    Set Recipient Data
-                  </button> */}
                 </form>
               </div>
             </div>
@@ -860,7 +887,6 @@ const AddInvoice = () => {
       </div>
       {/* Item List Section */}
       {/* 5th row */}
-
       <div className="mx-auto mt-4 w-full max-w-4xl">
         <div className="rounded-lg ">
           {isOpenaccor && (
@@ -890,7 +916,7 @@ const AddInvoice = () => {
                       type="date"
                       id="serviceFromDate"
                       name="serviceFromDate"
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                      className="block w-full rounded-lg border border-gray-300 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                       value={formData.serviceFromDate}
                       onChange={handleInputChange}
                       required
@@ -923,7 +949,7 @@ const AddInvoice = () => {
                     type="date"
                     id="serviceToDate"
                     name="serviceToDate"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-300 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     value={formData.serviceToDate}
                     onChange={handleInputChange}
                   />
@@ -935,7 +961,6 @@ const AddInvoice = () => {
                   >
                     <span className="text-lg text-red-500">*</span>Due Date
                   </label>
-
                   <div className="relative max-w-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 pt-6">
                       <svg
@@ -953,7 +978,7 @@ const AddInvoice = () => {
                     type="date"
                     id="dueDate"
                     name="dueDate"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-300 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     value={formData.dueDate}
                     onChange={handleInputChange}
                   />
@@ -1025,5 +1050,4 @@ const AddInvoice = () => {
     </div>
   );
 };
-
-export default AddInvoice;
+export default CreateInvoice;

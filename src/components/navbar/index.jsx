@@ -74,7 +74,7 @@ const Navbar = (props) => {
         </p>
       </div>
 
-      <div className="relative mt-[3px] flex h-[61px] w-[355px] flex-grow items-center gap-2 rounded-full justify-around bg-white px-2 py-2 shadow-xl shadow-shadow-500 dark:!bg-navy-800 dark:shadow-none md:w-[365px] md:flex-grow-0 md:gap-1 xl:w-[150px] xl:gap-2">
+      <div className="relative mt-[3px] flex h-[61px] w-[355px] flex-grow items-center justify-around gap-2 rounded-full bg-white px-2 py-2 shadow-xl shadow-shadow-500 dark:!bg-navy-800 dark:shadow-none md:w-[365px] md:flex-grow-0 md:gap-1 xl:w-[150px] xl:gap-2">
         {/* <div className="flex h-full items-center rounded-full bg-lightPrimary text-navy-700 dark:bg-navy-900 dark:text-white xl:w-[225px]">
           <p className="pl-3 pr-2 text-xl">
             <FiSearch className="h-4 w-4 text-gray-400 dark:text-white" />
@@ -242,7 +242,6 @@ const Navbar = (props) => {
                 >
                   {user ? "Log Out" : "Log In"}
                 </a>
-                
               </div>
             </div>
           }
@@ -250,14 +249,14 @@ const Navbar = (props) => {
         />
         {showModal && user && (
           <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
-          <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>
-          <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <DeleteConfirmationModal
-              onClose={handleCloseModal}
-              onConfirm={handleConfirmDelete}
-            />
+            <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>
+            <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+              <DeleteConfirmationModal
+                onClose={handleCloseModal}
+                onConfirm={handleConfirmDelete}
+              />
+            </div>
           </div>
-        </div>
         )}
       </div>
     </nav>

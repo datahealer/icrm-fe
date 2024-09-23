@@ -23,7 +23,7 @@ export default function DeleteProjectConfirm({ onClose, onConfirm }) {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span className="sr-only">Close modal</span>
+                <span className="sr-only">Close modal!</span>
               </button>
               <p className="mb-4 text-gray-500">
                 Are you sure you want to Delete?

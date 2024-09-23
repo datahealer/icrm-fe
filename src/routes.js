@@ -11,7 +11,11 @@ import Client from "views/admin/client";
 import Invoice from "views/admin/invoice";
 import Project from "views/admin/project";
 import Settings from "views/admin/settings";
-import InvoiceDrawer from "./views/admin/invoice/components/InvoiceDrawer";
+import Purchaseitem from "views/admin/purchaseitems";
+import Item from "views/admin/item";
+
+
+
 // Auth Imports
 import SignIn from "views/auth/SignIn";
 
@@ -25,9 +29,9 @@ import {
   MdLock,
   MdAssignment,
 } from "react-icons/md";
-import CreateInvoice from "views/admin/invoice/createInvoice";
-// import InvoiceDrawer from "views/admin/invoice/components/InvoiceDrawer";
 import { comment } from "postcss";
+import PurchaseInvoice from "views/admin/purchaseinvoice";
+
 
 const routes = [
   {
@@ -53,6 +57,7 @@ const routes = [
     // component: <NFTMarketplace />,
     // secondary: true,
   },
+ 
   {
     name: "Project",
     layout: "/admin",
@@ -68,6 +73,27 @@ const routes = [
     component: <Invoice />,
   },
   {
+    name: "Purchase Invoice",
+    layout: "/admin",
+    path: "detail",
+    icon: <MdAssignment className="h-6 w-6" />,
+    component: <PurchaseInvoice />,
+  },
+  {
+    name: "Purchase Items",
+    layout: "/admin",
+    path: "purchaseitem",
+    icon: <MdAssignment className="h-6 w-6" />,
+    component: <Purchaseitem />,
+  },
+  {
+    name: "Items",
+    layout: "/admin",
+    path: "list",
+    icon: <MdAssignment className="h-6 w-6" />,
+    component: <Item />,
+  },
+  {
     name: "Settings",
     layout: "/admin",
     path: "settings",
@@ -81,12 +107,6 @@ const routes = [
     icon: <MdLock className="pointer-events-none h-6 w-6  text-white" />,
     component: <SignIn />,
   },
-  {
-    name: "invoice",
-    layout: "/admin",
-    path: "createinvoice",
-    icon: <MdLock className="pointer-events-none h-6 w-6 text-white" />,
-    component: <CreateInvoice />,
-  },
 ];
 export default routes;
+
