@@ -1,15 +1,38 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState} from "react";
+import axios from "axios";
+import PhoneInput from "react-phone-number-input";
+import { placeData } from "../../../../constant/place.js";
+import { getNames, getCode } from "country-list";
+
+const options = [
+  { value: "INR", label: "INR - Indian Rupee" },
+  { value: "USD", label: "USD - US Dollar" },
+  { value: "AUD", label: "AUD - Australian Dollar" },
+  { value: "NZD", label: "NZD - New Zealand Dollar" },
+  { value: "SGD", label: "SGD - Singapore Dollar" },
+  { value: "AED", label: "AED - UAE Dirham" },
+  { value: "OMR", label: "OMR - Omani Rial" },
+  { value: "GBP", label: "GBP - British Pound" },
+  { value: "EUR", label: "EUR - Euro" },
+  { value: "CAD", label: "CAD - Canadian Dollar" },
+];
+
+
+
 
 const UpdateDrawer = ({
   isUpdateDrawerOpen,
   handleUpdateDrawerToggle,
   idData,
+  error,
   handleUpdateChange,
   sendUpdate,
   user,
   selectedId,
 }) => {
   const updateRef = useRef(null);
+  const countries = getNames();
+
 
   const handleClickOutsideUpdate = (event) => {
     if (updateRef.current && !updateRef.current.contains(event.target)) {
@@ -17,7 +40,45 @@ const UpdateDrawer = ({
     }
   };
 
+  const [userList, setUserList] = useState([]);
+  const [managerList, setManagerList] = useState([]);
+  const getUserList = async () => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getUser`;
+      const authToken = user.token;
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      setUserList(response.data.users);
+    } catch (error) {
+      console.log("Failed to fetch user list");
+    }
+  };
+
+  const getManagerList = async () => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getManagers`;
+      const authToken = user.token;
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      setManagerList(response.data.managers);
+    } catch (error) {
+      console.log("Failed to fetch user list");
+    }
+  };
+
   useEffect(() => {
+    getUserList();
+    getManagerList();
     if (isUpdateDrawerOpen) {
       document.addEventListener("mousedown", handleClickOutsideUpdate);
     }
@@ -71,12 +132,69 @@ const UpdateDrawer = ({
             <span className="sr-only">Close menu</span>
           </button>
           <form className="mb-6">
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="acquisitionPersonId"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Acquisition
+                Person
+              </label>
+              <select
+                id="acquisitionPersonId"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm capitalize text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.acquisitionPersonId}
+                onChange={handleUpdateChange}
+                name="acquisitionPersonId"
+                required
+              >
+                <option value="">Choose a user</option>
+                {Array.isArray(userList) && userList.length > 0 ? (
+                  userList.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No users available</option>
+                )}
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="manager"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Manager
+              </label>
+              <select
+                id="manager"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm capitalize text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.manager}
+                onChange={handleUpdateChange}
+                name="manager"
+                required
+              >
+                console.log(managerList)
+                <option value="">Choose Manager</option>
+                {Array.isArray(managerList) && managerList.length > 0 ? (
+                  managerList.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No users available</option>
+                )}
+              </select>
+            </div>
             <div className="mb-6">
               <label
                 htmlFor="primaryContactPerson"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Contact Person
+                <span className="text-lg text-red-500">*</span>Primary Contact Person
               </label>
               <input
                 type="text"
@@ -87,6 +205,58 @@ const UpdateDrawer = ({
                 value={idData.primaryContactPerson}
                 onChange={handleUpdateChange}
                 required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="l2ContactPerson"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>L2 Contact Person
+              </label>
+              <input
+                type="text"
+                id="l2ContactPerson"
+                name="l2ContactPerson"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="L2 Contact Person's name"
+                value={idData.l2ContactPerson}
+                onChange={handleUpdateChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="serviceStartDate"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Service Start
+                Date
+              </label>
+              <input
+                type="date"
+                id="serviceStartDate"
+                name="serviceStartDate"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.serviceStartDate}
+                onChange={handleUpdateChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="serviceEndDate"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Service End Date
+              </label>
+              <input
+                type="date"
+                id="serviceEndDate"
+                name="serviceEndDate"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.serviceEndDate}
+                onChange={handleUpdateChange}
               />
             </div>
             <div className="mb-6">
@@ -110,18 +280,18 @@ const UpdateDrawer = ({
 
             <div className="mb-6">
               <label
-                htmlFor="customerDisplayName"
+                htmlFor="displayName"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
                 <span className="text-lg text-red-500">*</span>Display Name
               </label>
               <input
                 type="text"
-                id="customerDisplayName"
-                name="customerDisplayName"
+                id="displayName"
+                name="displayName"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                placeholder="Display Name"
-                value={idData.customerDisplayName}
+                placeholder="Display"
+                value={idData.displayName}
                 onChange={handleUpdateChange}
                 required
               />
@@ -132,7 +302,7 @@ const UpdateDrawer = ({
                 htmlFor="businessName"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Company
+                <span className="text-lg text-red-500">*</span>Business Name
               </label>
               <input
                 type="text"
@@ -151,16 +321,23 @@ const UpdateDrawer = ({
                 htmlFor="primaryContactNumber"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Phone
+                <span className="text-lg text-red-500">*</span>Primary Contact Number
               </label>
-              <input
+              <PhoneInput
                 type="phone"
                 id="primaryContactNumber"
                 name="primaryContactNumber"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Primary phone number"
                 value={idData.primaryContactNumber}
-                onChange={handleUpdateChange}
+                onChange={(value) =>
+                  handleUpdateChange({
+                    target: {
+                      name: "primaryContactNumber",
+                      value,
+                    },
+                  })
+                }
                 required
               />
             </div>
@@ -174,11 +351,29 @@ const UpdateDrawer = ({
               </label>
               <input
                 type="email"
-                id="email"
-                name="email"
+                id="billingToEmail"
+                name="billingToEmail"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Your email"
-                value={idData.email}
+                value={idData.billingToEmail}
+                onChange={handleUpdateChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                CC Email
+              </label>
+              <input
+                type="email"
+                id="billingCcEmail"
+                name="billingCcEmail"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="CC email"
+                value={idData.billingCcEmail}
                 onChange={handleUpdateChange}
                 required
               />
@@ -242,59 +437,120 @@ const UpdateDrawer = ({
               >
                 <span className="text-lg text-red-500">*</span>Secondary Phone
               </label>
-              <input
-                type="phone"
+              <PhoneInput
                 id="secondaryContactNumber"
                 name="secondaryContactNumber"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Secondary phone number"
                 value={idData.secondaryContactNumber}
-                onChange={handleUpdateChange}
-                required
+                onChange={(value) =>
+                  handleUpdateChange({
+                    target: {
+                      name: "secondaryContactNumber",
+                      value,
+                    },
+                  })
+                }
               />
             </div>
 
             <div className="mx-auto mb-6">
               <label
-                htmlFor="GSTTreatment"
+                htmlFor="gstTreatment"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
                 <span className="text-lg text-red-500">*</span>GST Treatment
               </label>
               <select
-                id="GSTTreatment"
-                name="GSTTreatment"
+                id="gstTreatment"
+                name="gstTreatment"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                value={idData.GSTTreatment}
+                value={idData.gstTreatment}
                 onChange={handleUpdateChange}
                 required
               >
                 <option selected>Choose a GST Treatment</option>
-                <option value="Registered">Registered</option>
-                <option value="Registered – Composition">
-                  Registered – Composition
+                <option value="REGISTERED">Registered</option>
+                <option value="REGISTERED_COMPOSITION">
+                  REGISTERED - Composition
                 </option>
-                <option value="Unregistered">Unregistered</option>
-                <option value="Consumer">Consumer</option>
-                <option value="Overseas">Overseas</option>
+                <option value="UNREGISTERED">Unregistered</option>
+                <option value="CONSUMER">Consumer</option>
+                <option value="OVERSEAS">Overseas</option>
                 <option value="SEZ">SEZ</option>
               </select>
             </div>
-
+            {(idData.gstTreatment === "REGISTERED" ||
+              idData.gstTreatment === "REGISTERED_COMPOSITION") && (
+              <div className="mb-6">
+                <label
+                  htmlFor="gstin"
+                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  <span className="text-lg text-red-500">*</span>GSTIN
+                </label>
+                <input
+                  type="text"
+                  id="gstin"
+                  name="gstin"
+                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  placeholder="Enter your Gst Number"
+                  value={idData.gstin}
+                  onChange={handleUpdateChange}
+                  required
+                />
+                <span class="text-red-500">{error.gstin}</span>
+              </div>
+            )}
             <div className="mb-6">
               <label
-                htmlFor="placeOfSupply"
+                htmlFor="serviceAgreementFolderUrl"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Place Of Supply
+                <span className="text-lg text-red-500">*</span>Service Agreement
+                Folder
               </label>
               <input
-                type="text"
-                id="placeOfSupply"
-                name="placeOfSupply"
+                type="url"
+                id="serviceAgreementFolderUrl"
+                name="serviceAgreementFolderUrl"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                placeholder="Place Of Supply"
-                value={idData.placeOfSupply}
+                placeholder="Enter your service agreement folder url"
+                value={idData.serviceAgreementFolderUrl}
+                onChange={handleUpdateChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="ndaFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>NDA Folder
+              </label>
+              <input
+                type="url"
+                id="ndaFolderUrl"
+                name="ndaFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter your NDA folder url"
+                value={idData.ndaFolderUrl}
+                onChange={handleUpdateChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="sowFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                SOW Folder
+              </label>
+              <input
+                type="url"
+                id="sowFolderUrl"
+                name="sowFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter your SOW folder url"
+                value={idData.sowFolderUrl}
                 onChange={handleUpdateChange}
               />
             </div>
@@ -329,30 +585,312 @@ const UpdateDrawer = ({
                 name="taxPreference"
               >
                 <option selected>Choose tax preference</option>
-                <option value="Taxable">Taxable</option>
-                <option value="Tax Exempt">Tax Exempt</option>
+                <option value="TAXABLE">Taxable</option>
+                <option value="TAX_EXEMPT">Tax Exempt</option>
+              </select>
+            </div>
+
+           
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="paymentTerms"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Payment Terms
+              </label>
+              <select
+                id="paymentTerms"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.paymentTerms}
+                onChange={handleUpdateChange}
+                name="paymentTerms"
+                required
+              >
+                <option selected>Choose Payment Term</option>
+                <option value="DUE_ON_RECEIPT">Due On Receipt</option>
+                <option value="NET30">Net 30</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="source"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Source
+              </label>
+              <select
+                id="source"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.source}
+                onChange={handleUpdateChange}
+                name="source"
+                required
+              >
+                <option selected>Choose Source</option>
+                <option value="UPWORK">UPWORK</option>
+                <option value="LINKEDIN">LINKEDIN</option>
+                <option value="EXTERNAL_LEAD">EXTERNAL_LEAD</option>
+                <option value="SUBSIDIARY">SUBSIDIARY</option>
+                <option value="REFERENCE">REFERENCE</option>
+                <option value="ZOOMINFO">ZOOMINFO</option>
+                <option value="PERSONAL_NETWORK">PERSONAL_NETWORK</option>
+                <option value="COGNISM">COGNISM</option>
               </select>
             </div>
 
             <div className="mx-auto mb-6">
               <label
-                htmlFor="currency"
+                htmlFor="placeOfSupply"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Currency
+                <span className="text-lg text-red-500">*</span>Place Of Supply
               </label>
               <select
-                id="currency"
+                id="placeOfSupply"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                value={idData.currency}
+                value={idData.placeOfSupply}
                 onChange={handleUpdateChange}
-                name="currency"
+                name="placeOfSupply"
+                required
+              > 
+                <option selected>Choose Place</option>
+                {placeData.map((place) => (
+                  <option key={place.code} value={place.code}>
+                    {place.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="paymentChannel"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <option selected>Choose a currency</option>
-                <option value="USD">USD</option>
+                <span className="text-lg text-red-500">*</span>Payment Channel
+              </label>
+              <select
+                id="paymentChannel"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.paymentChannel}
+                onChange={handleUpdateChange}
+                name="paymentChannel"
+                required
+              >
+                <option selected>Choose Payment Channel</option>
+                <option value="WISE">WISE</option>
+                <option value="WISE_ACH">WISE_ACH</option>
+                <option value="XE">XE</option>
+                <option value="UPWORK">UPWORK</option>
+                <option value="AIRWALLEX">AIRWALLEX</option>
+                <option value="PAYPAL">PAYPAL</option>
+                <option value="INTERNATIONAL_WIRE">INTERNATIONAL WIRE</option>
+                <option value="NEFT/UPI">NEFT/UPI</option>
+                <option value="CHEQUE_INR">CHEQUE (INR)</option>
+                <option value="CASH_INR">CASH (INR)</option>
+                <option value="CASH_USD">CASH (USD)</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="receivingAccount"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Receiving Account
+              </label>
+              <select
+                id="receivingAccount"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.receivingAccount}
+                onChange={handleUpdateChange}
+                name="receivingAccount"
+                required
+              >
+                <option selected>Choose Receiving Account</option>
+                <option value="IOB_1173">IOB</option>
+                <option value="IDFC_3481">IDFC FIRST BANK</option>
+                <option value="ICIC_XXX">ICICI BANK</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="receivingCurrency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Receiving
+                Currency
+              </label>
+              <select
+                id="receivingCurrency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.receivingCurrency}
+                onChange={handleUpdateChange}
+                name="receivingCurrency"
+                required
+              >
+                <option selected>Choose Receiving Currency</option>
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceCurrency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Currency
+              </label>
+              <select
+                id="invoiceCurrency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.invoiceCurrency}
+                onChange={handleUpdateChange}
+                name="invoiceCurrency"
+                required
+              >
+                <option selected>Choose Invoice Currency</option>
+
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceFrequency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Frequency
+              </label>
+              <select
+                id="invoiceFrequency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.invoiceFrequency}
+                onChange={handleUpdateChange}
+                name="invoiceFrequency"
+                required
+              >
+                <option selected>Choose Schedule</option>
+                <option value="WEEKLY_EVERY_MONDAY">
+                  Weekly - Every Monday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_LAST_SUNDAY">
+                  Monthly - Day After Last Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_FIRST_SUNDAY">
+                  Monthly - Day After First Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_SECOND_SUNDAY">
+                  Monthly - Day After Second Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_THIRD_SUNDAY">
+                  Monthly - Day After Third Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_FOURTH_SUNDAY">
+                  Monthly - Day After Fourth Sunday
+                </option>
+                <option value="FORTNIGHTLY_FIRST_AND_THIRD_MONDAY">
+                  Fortnightly - First and Third Monday
+                </option>
+                <option value="FORTNIGHTLY_SECOND_AND_FOURTH_MONDAY">
+                  Fortnightly - Second and Fourth Monday
+                </option>
+                <option value="FORTNIGHTLY_MONDAY_EVEN_WEEKS">
+                  Fortnightly - Monday Even Weeks
+                </option>
+                <option value="FORTNIGHTLY_MONDAY_ODD_WEEKS">
+                  Fortnightly - Monday Odd Weeks
+                </option>
               </select>
             </div>
 
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceDelivery"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Delivery
+              </label>
+              <select
+                id="invoiceDelivery"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.invoiceDelivery}
+                onChange={handleUpdateChange}
+                name="invoiceDelivery"
+                required
+              >
+                <option selected>Choose Delivery Option</option>
+                <option value="AUTOMATIC_TO_EMAIL">Automatic to Email</option>
+                <option value="AUTOMATIC_VIA_ASANA">Automatic via Asana</option>
+                <option value="MANUAL">Manual</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceFollowupPlan"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Followup
+                Plan
+              </label>
+              <select
+                id="invoiceFollowupPlan"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.invoiceFollowupPlan}
+                onChange={handleUpdateChange}
+                name="invoiceFollowupPlan"
+                required
+              >
+                <option selected>Choose Followup Plan </option>
+                <option value="7_15">7 - 15</option>
+                <option value="15_20">15 - 20</option>
+                <option value="25_30">25 - 30</option>
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceDisplayCurrencies"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Display
+                Currencies
+              </label>
+              <select
+                id="invoiceDisplayCurrencies"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={idData.invoiceDisplayCurrencies}
+                onChange={handleUpdateChange}
+                name="invoiceDisplayCurrencies"
+                multiple
+                required
+              >
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
             <div className="mb-6">
               <label
                 htmlFor="openingBalance"
@@ -371,23 +909,65 @@ const UpdateDrawer = ({
               />
             </div>
 
-            <div className="mx-auto mb-6">
+            {/* <div className="mb-6">
               <label
-                htmlFor="enablePortal"
+                htmlFor="invoicePrefix"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Enable Portal
+                <span className="text-lg text-red-500">*</span>Invoice Prefix
+              </label>
+              <input
+                type="text"
+                id="invoicePrefix"
+                name="invoicePrefix"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Invoice Prefix"
+                value={idData.invoicePrefix}
+                onChange={handleUpdateChange}
+              />
+              <span class="text-red-500">{error.invoicePrefix}</span>
+            </div> */}
+            <div className="mb-6">
+              <label
+                htmlFor="address"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter the Client's address"
+                value={idData.address}
+                onChange={handleUpdateChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="country"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Country
               </label>
               <select
-                id="enablePortal"
+                id="country"
+                name="country"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                value={idData.enablePortal}
+                value={idData.country}
                 onChange={handleUpdateChange}
-                name="enablePortal"
+                required
               >
-                <option selected>Choose an action</option>
-                <option value="YES">YES</option>
-                <option value="NO">NO</option>
+                <option value="">Choose Country</option>
+                {countries.map((country) => {
+                  const code = getCode(country);
+                  return (
+                    <option key={code} value={code.toLowerCase()}>
+                      {country}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 

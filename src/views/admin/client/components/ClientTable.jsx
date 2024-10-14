@@ -8,6 +8,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import AddDrawer from "./AddDrawer";
 import UpdateDrawer from "./UpdateDrawer";
 import axios from "axios";
+import moment from "moment";
 
 export default function ClientTable() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -63,15 +64,15 @@ export default function ClientTable() {
     billingCcEmail: "",
     password: "",
     primaryContactNumber: "",
+    ndaFolderUrl:"",
     secondaryContactNumber: "",
-    GSTTreatment: "",
+    gstTreatment: "",
     gstin: "",
     serviceStartDate: "",
     serviceEndDate: "",
     placeOfSupply: "",
     taxPreference: "",
     paymentTerms: "",
-    currency: "USD",
     openingBalance: 0,
     address: "",
     sowFolderUrl: "",
@@ -143,7 +144,7 @@ export default function ClientTable() {
       if (!uniquePrefix(value)) {
         setError((prevError) => ({
           ...prevError,
-          [name]: "Please enter a valid GSTIN",
+          [name]: "Please enter a valid Prefix",
         }));
       } else {
         setError((prevError) => ({
@@ -190,7 +191,77 @@ export default function ClientTable() {
     const numericFields = ["hourlyRate", "tdsRate", "gstRate"];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
+    const validNamePattern = /^[a-zA-Z\s\-]+$/;
+
+    if (event.target.multiple) {
+      const selectedValues = Array.from(
+        event.target.selectedOptions,
+        (option) => option.value
+      );
+      console.log("Selected values:", selectedValues);
+      setIdData((prevIdData) => {
+        const existingValues = prevIdData[name] || [];
+
+        // Use a Set to avoid duplicates if needed
+        const updatedValues = [
+          ...new Set([...existingValues, ...selectedValues]),
+        ];
+
+        return {
+          ...prevIdData,
+          [name]: updatedValues,
+        };
+      });
+      return;
+    }
+
+    if (name === "invoicePrefix") {
+      if (!uniquePrefix(value)) {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "Please enter a valid GSTIN",
+        }));
+      } else {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "",
+        }));
+      }
+    }
+
+    if (name === "gstin") {
+      if (!validateGstin(value)) {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "Please enter a valid GSTIN",
+        }));
+      } else {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "",
+        }));
+      }
+    }
+
+    if (name === "l2ContactPerson") {
+      if (validNamePattern.test(value) || value === "") {
+        // Only update formData if the name is valid (or empty)
+        setIdData((prevIdData) => ({
+          ...prevIdData,
+          [name]: value,
+        }));
+      } else {
+        console.log(
+          "Invalid name: Only letters, spaces, and hyphens are allowed."
+        );
+      }
+    } else
+    {
+
+    
+
     setIdData({ ...idData, [name]: parsedValue });
+    }
   };
 
   const handleSubmit = (event) => {
@@ -287,21 +358,44 @@ export default function ClientTable() {
 
   const [idData, setIdData] = useState({
     primaryContactPerson: "",
+    serviceAgreementFolderUrl: "",
+    ndaFolderUrl: "",
+    acquisitionPersonId: "",
+    manager: "",
     l2ContactPerson: "",
     billingContactPerson: "",
     businessName: "",
-    customerDisplayName: "",
-    email: "",
+    displayName: "",
+    billingToEmail: "",
+    billingCcEmail: "",
     password: "",
     primaryContactNumber: "",
     secondaryContactNumber: "",
     gstTreatment: "",
+    gstin: undefined,
+    serviceStartDate: "",
+    serviceEndDate: "",
     placeOfSupply: "",
-    taxPreference: "Taxable",
+    taxPreference: "",
+    paymentTerms: "",
     currency: "USD",
     openingBalance: 0,
+    address: "",
+    sowFolderUrl: "",
+    country: "",
     nestedFields: [],
+    paymentChannel: "",
+    receivingAccount: "",
+    receivingCurrency: "",
+    invoiceCurrency: "",
+    invoiceFrequency: "",
+    invoicePrefix: "",
+    invoiceDelivery: "",
+    invoiceFollowupPlan: "",
+    invoiceDisplayCurrencies: [],
   });
+
+  console.log(idData, "lsq");
 
   const handleUpdate = async (event, id) => {
     event.preventDefault();
@@ -314,21 +408,53 @@ export default function ClientTable() {
       }
       const data = await response.json();
       console.log(data);
+
       setIdData({
         primaryContactPerson: data.data.client.primaryContactPerson || "",
+        serviceAgreementFolderUrl:
+          data.data.client.serviceAgreementFolderUrl || "",
+        acquisitionPersonId: data.data.client.acquisitionPersonId || "",
+        ndaFolderUrl: data.data.client.ndaFolderUrl || "",
+
+        manager: data.data.client.manager || "",
         l2ContactPerson: data.data.client.l2ContactPerson || "",
         billingContactPerson: data.data.client.billingContactPerson || "",
         businessName: data.data.client.businessName || "",
-        customerDisplayName: data.data.client.customerDisplayName || "",
-        email: data.data.client.email || "",
+        displayName: data.data.client.displayName || "",
+        billingToEmail: data.data.client.billingToEmail || "",
+        billingCcEmail: data.data.client.billingCcEmail || "",
         primaryContactNumber: data.data.client.primaryContactNumber || "",
         secondaryContactNumber: data.data.client.secondaryContactNumber || "",
-        GSTTreatment: data.data.client.GSTTreatment || "Registered",
+        gstTreatment: data.data.client.gstTreatment || "",
+        gstin: data.data.client.gstin || undefined,
+        serviceStartDate: data.data.client.serviceStartDate
+          ? moment(data.data.client.serviceStartDate).format(
+              "YYYY-MM-DD"
+            )
+          : "",
+        serviceEndDate: data.data.client.serviceStartDate
+        ? moment(data.data.client.serviceEndDate).format(
+            "YYYY-MM-DD"
+          )
+        : "",
         placeOfSupply: data.data.client.placeOfSupply || "",
-        taxPreference: data.data.client.taxPreference || "Taxable",
-        currency: data.data.client.currency || "USD",
+        taxPreference: data.data.client.taxPreference || "",
+        paymentTerms: data.data.client.paymentTerms || "",
         openingBalance: data.data.client.openingBalance || 0,
+        address: data.data.client.address || "",
+        sowFolderUrl: data.data.client.sowFolderUrl || "",
+        country: data.data.client.country || "",
         nestedFields: data.data.client.nestedFields || [],
+        paymentChannel: data.data.client.paymentChannel || "",
+        receivingAccount: data.data.client.receivingAccount || "",
+        receivingCurrency: data.data.client.receivingCurrency || "",
+        invoiceCurrency: data.data.client.invoiceCurrency || "",
+        invoiceFrequency: data.data.client.invoiceFrequency || "",
+        invoicePrefix: data.data.client.invoicePrefix || "",
+        invoiceDelivery: data.data.client.invoiceDelivery || "",
+        invoiceFollowupPlan: data.data.client.invoiceFollowupPlan || "",
+        invoiceDisplayCurrencies:
+          data.data.client.invoiceDisplayCurrencies || [],
       });
       setSelectedId(id);
     } catch (error) {
@@ -343,7 +469,6 @@ export default function ClientTable() {
   const sendUpdate = (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log(idData);
 
     // Send data to the API endpoint
     fetch(`${process.env.REACT_APP_API_URL}/client/${selectedId}`, {
