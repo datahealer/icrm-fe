@@ -6,6 +6,7 @@ import "react-phone-number-input/style.css";
 import { getNames, getCode } from "country-list";
 import { Select } from "@chakra-ui/react";
 import { components } from "react-select";
+import { placeData } from "../../../../constant/place.js";
 
 import axios from "axios";
 
@@ -183,7 +184,7 @@ const AddDrawer = ({
                 htmlFor="primaryContactPerson"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Contact Person
+                <span className="text-lg text-red-500">*</span>Primary Contact Person
               </label>
               <input
                 type="text"
@@ -291,7 +292,7 @@ const AddDrawer = ({
                 htmlFor="businessName"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Company
+                <span className="text-lg text-red-500">*</span>Business Name
               </label>
               <input
                 type="text"
@@ -310,7 +311,7 @@ const AddDrawer = ({
                 htmlFor="primaryContactNumber"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Phone
+                <span className="text-lg text-red-500">*</span>Primary Contact Number
               </label>
               <PhoneInput
                 type="phone"
@@ -544,24 +545,6 @@ const AddDrawer = ({
               />
             </div>
 
-            <div className="mb-6">
-              <label
-                htmlFor="placeOfSupply"
-                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-              >
-                <span className="text-lg text-red-500">*</span>Place Of Supply
-              </label>
-              <input
-                type="text"
-                id="placeOfSupply"
-                name="placeOfSupply"
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                placeholder="Place Of Supply"
-                value={formData.placeOfSupply}
-                onChange={handleInputChange}
-              />
-            </div>
-
             {/* <div className="mb-6">
                     <label
                       htmlFor="department"
@@ -659,6 +642,30 @@ const AddDrawer = ({
                 <option value="ZOOMINFO">ZOOMINFO</option>
                 <option value="PERSONAL_NETWORK">PERSONAL_NETWORK</option>
                 <option value="COGNISM">COGNISM</option>
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="placeOfSupply"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Place Of Supply
+              </label>
+              <select
+                id="placeOfSupply"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.placeOfSupply}
+                onChange={handleInputChange}
+                name="placeOfSupply"
+                required
+              > 
+                <option selected>Choose Place</option>
+                {placeData.map((place) => (
+                  <option key={place.code} value={place.code}>
+                    {place.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="mx-auto mb-6">
