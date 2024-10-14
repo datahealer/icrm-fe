@@ -7,6 +7,7 @@ import Spinner from "./Spinner";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import AddDrawer from "./AddDrawer";
 import UpdateDrawer from "./UpdateDrawer";
+import axios from "axios";
 
 export default function ClientTable() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -16,6 +17,7 @@ export default function ClientTable() {
   const { user } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [clientData, setClientData] = useState([]);
+  const [error, setError] = useState({});
   const [deleted, setDeleted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [updated, setUpdated] = useState(false);
@@ -50,22 +52,64 @@ export default function ClientTable() {
 
   const [formData, setFormData] = useState({
     primaryContactPerson: "",
+    serviceAgreementFolderUrl: "",
+    acquisitionPersonId: "",
+    manager: "",
     l2ContactPerson: "",
     billingContactPerson: "",
     businessName: "",
-    customerDisplayName: "",
-    email: "",
+    displayName: "",
+    billingToEmail: "",
+    billingCcEmail: "",
     password: "",
     primaryContactNumber: "",
     secondaryContactNumber: "",
-    GSTTreatment: "Registered",
+    GSTTreatment: "",
+    gstin: "",
+    serviceStartDate: "",
+    serviceEndDate: "",
     placeOfSupply: "",
-    taxPreference: "Taxable",
+    taxPreference: "",
+    paymentTerms: "",
     currency: "USD",
     openingBalance: 0,
-    enablePortal: "YES",
+    address: "",
+    sowFolderUrl: "",
+    country: "",
     nestedFields: [],
+    paymentChannel: "",
+    receivingAccount: "",
+    receivingCurrency: "",
+    invoiceCurrency: "",
+    invoiceFrequency: "",
+    invoicePrefix: "",
+    invoiceDelivery: "",
+    invoiceFollowupPlan: "",
+    invoiceDisplayCurrencies: [],
   });
+  const validateGstin = (gstin) => {
+    // Updated GSTIN regex pattern
+    const gstinPattern =
+      /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
+    return gstinPattern.test(gstin);
+  };
+  const uniquePrefix = async (prefix) => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/client/getPrefixes`;
+      const authToken = user.token;
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const existingPrefixes = response.data.prefixes;
+      const isUnique = !existingPrefixes.includes(prefix);
+      return isUnique;
+    } catch (error) {
+      console.error("Error checking prefix uniqueness:", error);
+    }
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -73,11 +117,72 @@ export default function ClientTable() {
     const numericFields = ["hourlyRate", "tdsRate", "gstRate"];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
+    const validNamePattern = /^[a-zA-Z\s\-]+$/;
+    if (event.target.multiple) {
+      const selectedValues = Array.from(
+        event.target.selectedOptions,
+        (option) => option.value
+      );
+      console.log("Selected values:", selectedValues);
+      setFormData((prevFormData) => {
+        const existingValues = prevFormData[name] || [];
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: parsedValue,
-    }));
+        // Use a Set to avoid duplicates if needed
+        const updatedValues = [
+          ...new Set([...existingValues, ...selectedValues]),
+        ];
+
+        return {
+          ...prevFormData,
+          [name]: updatedValues,
+        };
+      });
+      return;
+    }
+    if (name === "invoicePrefix") {
+      if (!uniquePrefix(value)) {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "Please enter a valid GSTIN",
+        }));
+      } else {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "",
+        }));
+      }
+    }
+    if (name === "gstin") {
+      if (!validateGstin(value)) {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "Please enter a valid GSTIN",
+        }));
+      } else {
+        setError((prevError) => ({
+          ...prevError,
+          [name]: "",
+        }));
+      }
+    }
+    if (name === "l2ContactPerson") {
+      if (validNamePattern.test(value) || value === "") {
+        // Only update formData if the name is valid (or empty)
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          [name]: value,
+        }));
+      } else {
+        console.log(
+          "Invalid name: Only letters, spaces, and hyphens are allowed."
+        );
+      }
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: parsedValue,
+      }));
+    }
   };
 
   const handleUpdateChange = (event) => {
@@ -100,7 +205,7 @@ export default function ClientTable() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${user.token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({ ...formData, acquisitionPersonId: user.user._id }),
     })
       .then((response) => {
         if (!response.ok) {
@@ -190,12 +295,11 @@ export default function ClientTable() {
     password: "",
     primaryContactNumber: "",
     secondaryContactNumber: "",
-    GSTTreatment: "Registered",
+    gstTreatment: "",
     placeOfSupply: "",
     taxPreference: "Taxable",
     currency: "USD",
     openingBalance: 0,
-    enablePortal: "YES",
     nestedFields: [],
   });
 
@@ -224,7 +328,6 @@ export default function ClientTable() {
         taxPreference: data.data.client.taxPreference || "Taxable",
         currency: data.data.client.currency || "USD",
         openingBalance: data.data.client.openingBalance || 0,
-        enablePortal: data.data.client.enablePortal || "YES",
         nestedFields: data.data.client.nestedFields || [],
       });
       setSelectedId(id);
@@ -340,6 +443,7 @@ export default function ClientTable() {
               formData={formData}
               handleInputChange={handleInputChange}
               handleSubmit={handleSubmit}
+              error={error}
               drawerRef={drawerRef}
             />
 
@@ -358,7 +462,7 @@ export default function ClientTable() {
           </div>
         </div>
         {showModal && (
-          <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+          <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center">
             <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
             <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
               <DeleteClientConfirmation
@@ -448,7 +552,7 @@ export default function ClientTable() {
       {spin && <Spinner />}
 
       {/* Pagination */}
-      <div className="mr-6 mb-4 flex justify-end">
+      <div className="mb-4 mr-6 flex justify-end">
         <Pagination
           itemsPerPage={itemsPerPage}
           totalItems={clientData.length}

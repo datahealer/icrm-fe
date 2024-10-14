@@ -1,15 +1,80 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuthContext } from "hooks/useAuthContext";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { getNames, getCode } from "country-list";
+import { Select } from "@chakra-ui/react";
+import { components } from "react-select";
 
+import axios from "axios";
+
+const options = [
+  { value: "INR", label: "INR - Indian Rupee" },
+  { value: "USD", label: "USD - US Dollar" },
+  { value: "AUD", label: "AUD - Australian Dollar" },
+  { value: "NZD", label: "NZD - New Zealand Dollar" },
+  { value: "SGD", label: "SGD - Singapore Dollar" },
+  { value: "AED", label: "AED - UAE Dirham" },
+  { value: "OMR", label: "OMR - Omani Rial" },
+  { value: "GBP", label: "GBP - British Pound" },
+  { value: "EUR", label: "EUR - Euro" },
+  { value: "CAD", label: "CAD - Canadian Dollar" },
+];
 const AddDrawer = ({
   isDrawerOpen,
   handleDrawerToggle,
+  error,
   formData,
   handleInputChange,
   handleSubmit,
   drawerRef,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const { user } = useAuthContext();
+  const countries = getNames();
+
+  const [userList, setUserList] = useState([]);
+  const [managerList, setManagerList] = useState([]);
+
+  const getUserList = async () => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getUser`;
+      const authToken = user.token;
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      setUserList(response.data.users);
+    } catch (error) {
+      console.log("Failed to fetch user list");
+    }
+  };
+
+  const getManagerList = async () => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getManagers`;
+      const authToken = user.token;
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      setManagerList(response.data.managers);
+    } catch (error) {
+      console.log("Failed to fetch user list");
+    }
+  };
+
+  useEffect(() => {
+    getUserList();
+    getManagerList();
+  }, []);
 
   return (
     <div>
@@ -17,12 +82,12 @@ const AddDrawer = ({
         <div
           ref={drawerRef}
           id="drawer-contact"
-          className="fixed top-0 right-0 z-40 h-screen w-80 -translate-x-0 overflow-y-auto bg-gray-100 p-4 transition-transform dark:bg-gray-800"
+          className="fixed right-0 top-0 z-40 h-screen w-80 -translate-x-0 overflow-y-auto bg-gray-100 p-4 transition-transform dark:bg-gray-800"
           tabIndex="-1"
         >
           <h5 className="mb-6 inline-flex items-center text-base font-semibold uppercase text-gray-500 dark:text-gray-400">
             <svg
-              className="h-4 w-4 me-2.5"
+              className="me-2.5 h-4 w-4"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -36,7 +101,7 @@ const AddDrawer = ({
           <button
             type="button"
             onClick={handleDrawerToggle}
-            className="bg-transparent absolute top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-gray-400 end-2.5 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+            className="bg-transparent absolute end-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
           >
             <svg
               className="h-3 w-3"
@@ -56,6 +121,63 @@ const AddDrawer = ({
             <span className="sr-only">Close menu</span>
           </button>
           <form className="mb-6">
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="acquisitionPersonId"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Acquisition
+                Person
+              </label>
+              <select
+                id="acquisitionPersonId"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm capitalize text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.acquisitionPersonId}
+                onChange={handleInputChange}
+                name="acquisitionPersonId"
+                required
+              >
+                <option value="">Choose a user</option>
+                {Array.isArray(userList) && userList.length > 0 ? (
+                  userList.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No users available</option>
+                )}
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="manager"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Manager
+              </label>
+              <select
+                id="manager"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm capitalize text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.manager}
+                onChange={handleInputChange}
+                name="manager"
+                required
+              >
+                console.log(managerList)
+                <option value="">Choose Manager</option>
+                {Array.isArray(managerList) && managerList.length > 0 ? (
+                  managerList.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No users available</option>
+                )}
+              </select>
+            </div>
             <div className="mb-6">
               <label
                 htmlFor="primaryContactPerson"
@@ -72,6 +194,58 @@ const AddDrawer = ({
                 value={formData.primaryContactPerson}
                 onChange={handleInputChange}
                 required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="l2ContactPerson"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>L2 Contact Person
+              </label>
+              <input
+                type="text"
+                id="l2ContactPerson"
+                name="l2ContactPerson"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="L2 Contact Person's name"
+                value={formData.l2ContactPerson}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="serviceStartDate"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Service Start
+                Date
+              </label>
+              <input
+                type="date"
+                id="serviceStartDate"
+                name="serviceStartDate"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.serviceStartDate}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="serviceEndDate"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Service End Date
+              </label>
+              <input
+                type="date"
+                id="serviceEndDate"
+                name="serviceEndDate"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.serviceEndDate}
+                onChange={handleInputChange}
               />
             </div>
             <div className="mb-6">
@@ -95,18 +269,18 @@ const AddDrawer = ({
 
             <div className="mb-6">
               <label
-                htmlFor="customerDisplayName"
+                htmlFor="displayName"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
                 <span className="text-lg text-red-500">*</span>Display Name
               </label>
               <input
                 type="text"
-                id="customerDisplayName"
-                name="customerDisplayName"
+                id="displayName"
+                name="displayName"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Display"
-                value={formData.customerDisplayName}
+                value={formData.displayName}
                 onChange={handleInputChange}
                 required
               />
@@ -138,14 +312,21 @@ const AddDrawer = ({
               >
                 <span className="text-lg text-red-500">*</span>Phone
               </label>
-              <input
+              <PhoneInput
                 type="phone"
                 id="primaryContactNumber"
                 name="primaryContactNumber"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Primary phone number"
                 value={formData.primaryContactNumber}
-                onChange={handleInputChange}
+                onChange={(value) =>
+                  handleInputChange({
+                    target: {
+                      name: "primaryContactNumber",
+                      value,
+                    },
+                  })
+                }
                 required
               />
             </div>
@@ -159,11 +340,29 @@ const AddDrawer = ({
               </label>
               <input
                 type="email"
-                id="email"
-                name="email"
+                id="billingToEmail"
+                name="billingToEmail"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Your email"
-                value={formData.email}
+                value={formData.billingToEmail}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                CC Email
+              </label>
+              <input
+                type="email"
+                id="billingCcEmail"
+                name="billingCcEmail"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="CC email"
+                value={formData.billingCcEmail}
                 onChange={handleInputChange}
                 required
               />
@@ -227,43 +426,122 @@ const AddDrawer = ({
               >
                 <span className="text-lg text-red-500">*</span>Secondary Phone
               </label>
-              <input
-                type="phone"
+              <PhoneInput
                 id="secondaryContactNumber"
                 name="secondaryContactNumber"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Secondary phone number"
                 value={formData.secondaryContactNumber}
-                onChange={handleInputChange}
-                required
+                onChange={(value) =>
+                  handleInputChange({
+                    target: {
+                      name: "secondaryContactNumber",
+                      value,
+                    },
+                  })
+                }
               />
             </div>
 
             <div className="mx-auto mb-6">
               <label
-                htmlFor="GSTTreatment"
+                htmlFor="gstTreatment"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
                 <span className="text-lg text-red-500">*</span>GST Treatment
               </label>
               <select
-                id="GSTTreatment"
-                name="GSTTreatment"
+                id="gstTreatment"
+                name="gstTreatment"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                value={formData.GSTTreatment}
+                value={formData.gstTreatment}
                 onChange={handleInputChange}
                 required
               >
                 <option selected>Choose a GST Treatment</option>
-                <option value="Registered">Registered</option>
-                <option value="Registered – Composition">
-                  Registered – Composition
+                <option value="REGISTERED">Registered</option>
+                <option value="REGISTERED_COMPOSITION">
+                  REGISTERED - Composition
                 </option>
-                <option value="Unregistered">Unregistered</option>
-                <option value="Consumer">Consumer</option>
-                <option value="Overseas">Overseas</option>
+                <option value="UNREGISTERED">Unregistered</option>
+                <option value="CONSUMER">Consumer</option>
+                <option value="OVERSEAS">Overseas</option>
                 <option value="SEZ">SEZ</option>
               </select>
+            </div>
+            {(formData.gstTreatment === "REGISTERED" ||
+              formData.gstTreatment === "REGISTERED_COMPOSITION") && (
+              <div className="mb-6">
+                <label
+                  htmlFor="gstin"
+                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  <span className="text-lg text-red-500">*</span>GSTIN
+                </label>
+                <input
+                  type="text"
+                  id="gstin"
+                  name="gstin"
+                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  placeholder="Enter your Gst Number"
+                  value={formData.gstin}
+                  onChange={handleInputChange}
+                  required
+                />
+                <span class="text-red-500">{error.gstin}</span>
+              </div>
+            )}
+            <div className="mb-6">
+              <label
+                htmlFor="serviceAgreementFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Service Agreement
+                Folder
+              </label>
+              <input
+                type="url"
+                id="serviceAgreementFolderUrl"
+                name="serviceAgreementFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter your service agreement folder url"
+                value={formData.serviceAgreementFolderUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="ndaFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>NDA Folder
+              </label>
+              <input
+                type="url"
+                id="ndaFolderUrl"
+                name="ndaFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter your NDA folder url"
+                value={formData.ndaFolderUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="sowFolderUrl"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                SOW Folder
+              </label>
+              <input
+                type="url"
+                id="sowFolderUrl"
+                name="sowFolderUrl"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter your SOW folder url"
+                value={formData.sowFolderUrl}
+                onChange={handleInputChange}
+              />
             </div>
 
             <div className="mb-6">
@@ -314,8 +592,8 @@ const AddDrawer = ({
                 name="taxPreference"
               >
                 <option selected>Choose tax preference</option>
-                <option value="Taxable">Taxable</option>
-                <option value="Tax Exempt">Tax Exempt</option>
+                <option value="TAXABLE">Taxable</option>
+                <option value="TAX_EXEMPT">Tax Exempt</option>
               </select>
             </div>
 
@@ -337,7 +615,282 @@ const AddDrawer = ({
                 <option value="USD">USD</option>
               </select>
             </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="paymentTerms"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Payment Terms
+              </label>
+              <select
+                id="paymentTerms"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.paymentTerms}
+                onChange={handleInputChange}
+                name="paymentTerms"
+                required
+              >
+                <option selected>Choose Payment Term</option>
+                <option value="DUE_ON_RECEIPT">Due On Receipt</option>
+                <option value="NET30">Net 30</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="source"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Source
+              </label>
+              <select
+                id="source"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.source}
+                onChange={handleInputChange}
+                name="source"
+                required
+              >
+                <option selected>Choose Source</option>
+                <option value="UPWORK">UPWORK</option>
+                <option value="LINKEDIN">LINKEDIN</option>
+                <option value="EXTERNAL_LEAD">EXTERNAL_LEAD</option>
+                <option value="SUBSIDIARY">SUBSIDIARY</option>
+                <option value="REFERENCE">REFERENCE</option>
+                <option value="ZOOMINFO">ZOOMINFO</option>
+                <option value="PERSONAL_NETWORK">PERSONAL_NETWORK</option>
+                <option value="COGNISM">COGNISM</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="paymentChannel"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Payment Channel
+              </label>
+              <select
+                id="paymentChannel"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.paymentChannel}
+                onChange={handleInputChange}
+                name="paymentChannel"
+                required
+              >
+                <option selected>Choose Payment Channel</option>
+                <option value="WISE">WISE</option>
+                <option value="WISE_ACH">WISE_ACH</option>
+                <option value="XE">XE</option>
+                <option value="UPWORK">UPWORK</option>
+                <option value="AIRWALLEX">AIRWALLEX</option>
+                <option value="PAYPAL">PAYPAL</option>
+                <option value="INTERNATIONAL_WIRE">INTERNATIONAL WIRE</option>
+                <option value="NEFT/UPI">NEFT/UPI</option>
+                <option value="CHEQUE_INR">CHEQUE (INR)</option>
+                <option value="CASH_INR">CASH (INR)</option>
+                <option value="CASH_USD">CASH (USD)</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="receivingAccount"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Receiving Account
+              </label>
+              <select
+                id="receivingAccount"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.receivingAccount}
+                onChange={handleInputChange}
+                name="receivingAccount"
+                required
+              >
+                <option selected>Choose Receiving Account</option>
+                <option value="IOB_1173">IOB</option>
+                <option value="IDFC_3481">IDFC FIRST BANK</option>
+                <option value="ICIC_XXX">ICICI BANK</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="receivingCurrency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Receiving
+                Currency
+              </label>
+              <select
+                id="receivingCurrency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.receivingCurrency}
+                onChange={handleInputChange}
+                name="receivingCurrency"
+                required
+              >
+                <option selected>Choose Receiving Currency</option>
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceCurrency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Currency
+              </label>
+              <select
+                id="invoiceCurrency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.invoiceCurrency}
+                onChange={handleInputChange}
+                name="invoiceCurrency"
+                required
+              >
+                <option selected>Choose Invoice Currency</option>
 
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceFrequency"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Frequency
+              </label>
+              <select
+                id="invoiceFrequency"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.invoiceFrequency}
+                onChange={handleInputChange}
+                name="invoiceFrequency"
+                required
+              >
+                <option selected>Choose Schedule</option>
+                <option value="WEEKLY_EVERY_MONDAY">
+                  Weekly - Every Monday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_LAST_SUNDAY">
+                  Monthly - Day After Last Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_FIRST_SUNDAY">
+                  Monthly - Day After First Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_SECOND_SUNDAY">
+                  Monthly - Day After Second Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_THIRD_SUNDAY">
+                  Monthly - Day After Third Sunday
+                </option>
+                <option value="MONTHLY_DAY_AFTER_FOURTH_SUNDAY">
+                  Monthly - Day After Fourth Sunday
+                </option>
+                <option value="FORTNIGHTLY_FIRST_AND_THIRD_MONDAY">
+                  Fortnightly - First and Third Monday
+                </option>
+                <option value="FORTNIGHTLY_SECOND_AND_FOURTH_MONDAY">
+                  Fortnightly - Second and Fourth Monday
+                </option>
+                <option value="FORTNIGHTLY_MONDAY_EVEN_WEEKS">
+                  Fortnightly - Monday Even Weeks
+                </option>
+                <option value="FORTNIGHTLY_MONDAY_ODD_WEEKS">
+                  Fortnightly - Monday Odd Weeks
+                </option>
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceDelivery"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Delivery
+              </label>
+              <select
+                id="invoiceDelivery"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.invoiceDelivery}
+                onChange={handleInputChange}
+                name="invoiceDelivery"
+                required
+              >
+                <option selected>Choose Delivery Option</option>
+                <option value="AUTOMATIC_TO_EMAIL">Automatic to Email</option>
+                <option value="AUTOMATIC_VIA_ASANA">Automatic via Asana</option>
+                <option value="MANUAL">Manual</option>
+              </select>
+            </div>
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceFollowupPlan"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Followup
+                Plan
+              </label>
+              <select
+                id="invoiceFollowupPlan"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.invoiceFollowupPlan}
+                onChange={handleInputChange}
+                name="invoiceFollowupPlan"
+                required
+              >
+                <option selected>Choose Followup Plan </option>
+                <option value="7_15">7 - 15</option>
+                <option value="15_20">15 - 20</option>
+                <option value="25_30">25 - 30</option>
+              </select>
+            </div>
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="invoiceDisplayCurrencies"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Invoice Display
+                Currencies
+              </label>
+              <select
+                id="invoiceDisplayCurrencies"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.invoiceDisplayCurrencies}
+                onChange={handleInputChange}
+                name="invoiceDisplayCurrencies"
+                multiple
+                required
+              >
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="NZD">NZD - New Zealand Dollar</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="AED">AED - UAE Dirham</option>
+                <option value="OMR">OMR - Omani Rial</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
             <div className="mb-6">
               <label
                 htmlFor="openingBalance"
@@ -356,23 +909,65 @@ const AddDrawer = ({
               />
             </div>
 
-            <div className="mx-auto mb-6">
+            <div className="mb-6">
               <label
-                htmlFor="enablePortal"
+                htmlFor="invoicePrefix"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Enable Portal
+                <span className="text-lg text-red-500">*</span>Invoice Prefix
+              </label>
+              <input
+                type="text"
+                id="invoicePrefix"
+                name="invoicePrefix"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Invoice Prefix"
+                value={formData.invoicePrefix}
+                onChange={handleInputChange}
+              />
+              <span class="text-red-500">{error.invoicePrefix}</span>
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="address"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Enter the Client's address"
+                value={formData.address}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="country"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Country
               </label>
               <select
-                id="enablePortal"
+                id="country"
+                name="country"
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                value={formData.enablePortal}
+                value={formData.country}
                 onChange={handleInputChange}
-                name="enablePortal"
+                required
               >
-                <option selected>Choose an action</option>
-                <option value="YES">YES</option>
-                <option value="NO">NO</option>
+                <option value="">Choose Country</option>
+                {countries.map((country) => {
+                  const code = getCode(country);
+                  return (
+                    <option key={code} value={code.toLowerCase()}>
+                      {country}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
