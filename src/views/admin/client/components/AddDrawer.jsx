@@ -65,7 +65,6 @@ const AddDrawer = ({
           "Content-Type": "application/json",
         },
       });
-      console.log(response);
       setManagerList(response.data.managers);
     } catch (error) {
       console.log("Failed to fetch user list");

@@ -7,6 +7,9 @@ import Pagination from "./Pagination";
 import ObjectId from "bson-objectid";
 import AddDrawer from "./AddDrawer";
 import UpdateDrawer from "./UpdateDrawer";
+import AddResourceDrawer from "./resource/AddResourceDrawer";
+import { ResourceDrawer } from "./resource/AddResource";
+import { ListResource } from "./resource/ListResource";
 
 const ProjectTable = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -62,20 +65,7 @@ const ProjectTable = () => {
     status: "In Progress",
     startDate: "",
     endDate: "",
-    resources: [
-      {
-        personId: "",
-        defaultAllocation: 5,
-        startDate: "",
-        endDate: "",
-        acquisitionPersonId: "",
-        billability: "Billable",
-        // shadowOf: "",
-        billingRate: null,
-        billableHours: [],
-        overtimeAllocations: [],
-      },
-    ],
+  
   });
 
   const handleResourceChange = (index, field, value) => {
@@ -164,19 +154,7 @@ const ProjectTable = () => {
           status: "In Progress",
           startDate: "",
           endDate: "",
-          resources: [
-            {
-              personId: "",
-              defaultAllocation: 5,
-              startDate: "",
-              endDate: "",
-              acquisitionPersonId: "",
-              billability: "Billable",
-              billingRate: null,
-              billableHours: [],
-              overtimeAllocations: [],
-            },
-          ],
+        
         });
       })
       .catch((error) => {
@@ -251,20 +229,7 @@ const ProjectTable = () => {
     status: "In Progress",
     startDate: "",
     endDate: "",
-    resources: [
-      {
-        personId: "",
-        defaultAllocation: 5,
-        startDate: "",
-        endDate: "",
-        acquisitionPersonId: "",
-        billability: "Billable",
-        // shadowOf: "",
-        billingRate: null,
-        billableHours: [],
-        overtimeAllocations: [],
-      },
-    ],
+   
   });
 
   const handleUpdateResourceChange = (index, field, value) => {
@@ -295,19 +260,7 @@ const ProjectTable = () => {
         status: data.status || "In Progress",
         startDate: data.startDate || "",
         endDate: data.endDate || "",
-        resources: [
-          {
-            personId: data.resources[0]?.personId || "",
-            defaultAllocation: data.resources[0]?.defaultAllocation || 5,
-            startDate: data.resources[0]?.startDate || "",
-            endDate: data.resources[0]?.endDate || "",
-            acquisitionPersonId: data.resources[0]?.acquisitionPersonId || "",
-            billability: data.resources[0]?.billability || "Billable",
-            billingRate: data.resources[0]?.billingRate || null,
-            billableHours: data.resources[0]?.billableHours || [],
-            overtimeAllocations: data.resources[0]?.overtimeAllocations || [],
-          },
-        ],
+     
       });
       setSelectedId(id);
     } catch (error) {
@@ -480,7 +433,7 @@ const ProjectTable = () => {
           {/* Add New Person */}
         </div>
         {showModal && (
-          <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+          <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center">
             <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
             <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
               <DeleteProjectConfirm
@@ -560,6 +513,8 @@ const ProjectTable = () => {
                         className="cursor-pointer text-lg text-red-500 hover:text-red-300"
                         onClick={(event) => handleDeleteClick(event, row._id)}
                       />
+                      <ResourceDrawer projectId={row._id} />
+                      <ListResource projectId={row._id} />
                     </div>
                   </td>
                 </tr>
@@ -570,7 +525,7 @@ const ProjectTable = () => {
 
       {spin && <Spinner />}
       {/* Pagination */}
-      <div className="mr-6 mb-4 flex justify-end">
+      <div className="mb-4 mr-6 flex justify-end">
         <Pagination
           itemsPerPage={itemsPerPage}
           totalItems={projectData.length}
