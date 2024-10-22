@@ -15,7 +15,7 @@ const AddDrawer = ({
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
-  return (
+  return (  
     <div>
       {isDrawerOpen && (
         <div
@@ -257,7 +257,7 @@ const AddDrawer = ({
                   Choose an Acquisition Person
                 </option>
                 {acquisitionPeople.map((person) => (
-                  <option key={person.id} value={person.displayName}>
+                  <option key={person._id} value={person.displayName}>
                     {person.displayName}
                   </option>
                 ))}

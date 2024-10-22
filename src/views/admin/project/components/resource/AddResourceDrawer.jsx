@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
+axios.defaults.withCredentials = true;
 
 const AddResourceDrawer = ({
   isDrawerOpen,
@@ -12,48 +13,23 @@ const AddResourceDrawer = ({
   drawerRef,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [managers, setManagers] = useState([]);
   const [user, setUserList] = useState([]);
-  const [acquisitionPeople, setAcquisitionPeople] = useState([]);
   const [people, setPeople] = useState([]);
 
-  const getUserList = async () => {
-    try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getUser`;
-      const authToken = user.token;
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      setUserList(response.data.users);
-    } catch (error) {
-      console.log("Failed to fetch user list");
-    }
-  };
-
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/people/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setPeople(data.data.people);
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/people/getPeople`)
+      .then((response) => {
+        const peopleData = response.data.data.people;
 
-        setAcquisitionPeople(
-          data.data.people.filter((person) => person.department === "Sales")
-        );
+        setPeople(peopleData);
 
-        setManagers(
-          data.data.people.filter(
-            (person) => person.department === "Engineering"
-          )
-        );
       })
       .catch((error) => {
         console.error("Failed to fetch people", error);
       });
   }, []);
+
   return (
     <div>
       {isDrawerOpen && (
@@ -116,8 +92,8 @@ const AddResourceDrawer = ({
                 required
               >
                 <option value="">Choose a Person</option>
-                {managers.map((person) => (
-                  <option key={person.id} value={person._id}>
+                {people.map((person) => (
+                  <option key={person._id} value={person._id}>
                     {person.displayName}
                   </option>
                 ))}
@@ -227,8 +203,8 @@ const AddResourceDrawer = ({
                 required
               >
                 <option value="">Choose an Acquisition Person</option>
-                {acquisitionPeople.map((person) => (
-                  <option key={person.id} value={person._id}>
+                {people.map((person) => (
+                  <option key={person._id} value={person._id}>
                     {person.displayName}
                   </option>
                 ))}

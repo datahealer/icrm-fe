@@ -10,6 +10,7 @@ import { placeData } from "../../../../constant/place.js";
 
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
 const options = [
   { value: "INR", label: "INR - Indian Rupee" },
   { value: "USD", label: "USD - US Dollar" },
@@ -35,21 +36,14 @@ const AddDrawer = ({
   const { user } = useAuthContext();
   const countries = getNames();
 
-  const [userList, setUserList] = useState([]);
+  const [people, setPeople] = useState([]);
   const [managerList, setManagerList] = useState([]);
 
   const getUserList = async () => {
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getUser`;
-      const authToken = user.token;
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      setUserList(response.data.users);
+      const apiUrl = `${process.env.REACT_APP_API_URL}/people/getPeople`;
+      const response = await axios.get(apiUrl);
+      setPeople(response.data.data.people);
     } catch (error) {
       console.log("Failed to fetch user list");
     }
@@ -57,15 +51,9 @@ const AddDrawer = ({
 
   const getManagerList = async () => {
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/auth/getManagers`;
-      const authToken = user.token;
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      setManagerList(response.data.managers);
+      const apiUrl = `${process.env.REACT_APP_API_URL}/people/getManagers`;
+      const response = await axios.get(apiUrl);
+      setManagerList(response.data.data.managers);
     } catch (error) {
       console.log("Failed to fetch user list");
     }
@@ -137,11 +125,11 @@ const AddDrawer = ({
                 name="acquisitionPersonId"
                 required
               >
-                <option value="">Choose a user</option>
-                {Array.isArray(userList) && userList.length > 0 ? (
-                  userList.map((user) => (
+                <option value="">Choose a user </option>
+                {Array.isArray(people) && people.length > 0 ? (
+                  people.map((user) => (
                     <option key={user._id} value={user._id}>
-                      {user.firstName} {user.lastName}
+                      {user.displayName}
                     </option>
                   ))
                 ) : (
@@ -183,7 +171,8 @@ const AddDrawer = ({
                 htmlFor="primaryContactPerson"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Primary Contact Person
+                <span className="text-lg text-red-500">*</span>Primary Contact
+                Person
               </label>
               <input
                 type="text"
@@ -310,7 +299,8 @@ const AddDrawer = ({
                 htmlFor="primaryContactNumber"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Primary Contact Number
+                <span className="text-lg text-red-500">*</span>Primary Contact
+                Number
               </label>
               <PhoneInput
                 type="phone"
@@ -579,7 +569,6 @@ const AddDrawer = ({
               </select>
             </div>
 
-          
             <div className="mx-auto mb-6">
               <label
                 htmlFor="paymentTerms"
@@ -641,7 +630,7 @@ const AddDrawer = ({
                 onChange={handleInputChange}
                 name="placeOfSupply"
                 required
-              > 
+              >
                 <option selected>Choose Place</option>
                 {placeData.map((place) => (
                   <option key={place.code} value={place.code}>

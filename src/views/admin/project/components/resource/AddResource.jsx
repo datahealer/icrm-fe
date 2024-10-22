@@ -1,10 +1,11 @@
 import AddResourceDrawer from "./AddResourceDrawer";
 import { useEffect, useRef, useState } from "react";
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import axios from "axios";
 import { useAuthContext } from "hooks/useAuthContext";
+
+axios.defaults.withCredentials = true;
 
 export const ResourceDrawer = ({ projectId }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -41,12 +42,7 @@ export const ResourceDrawer = ({ projectId }) => {
       try {
         const apiUrl = `${process.env.REACT_APP_API_URL}/project/${value}/get-project-allocation`;
         const authToken = user.token;
-        const response = await axios.get(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.get(apiUrl);
         setTotalAllocation(response.data.totalAllocation);
       } catch (error) {
         console.error("Error fetching allocation:", error);
@@ -89,13 +85,7 @@ export const ResourceDrawer = ({ projectId }) => {
     axios
       .post(
         `${process.env.REACT_APP_API_URL}/project/${projectId}/create-project`,
-        formattedFormData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
+        formattedFormData
       )
       .then((response) => {
         console.log("Success:", response.data);
@@ -139,7 +129,7 @@ export const ResourceDrawer = ({ projectId }) => {
           className="font-medium text-blue-600 hover:underline dark:text-blue-500"
           onClick={handleDrawerToggle}
         >
-            <PersonAddIcon className="mr-2" />
+          <PersonAddIcon className="mr-2" />
         </a>
       </div>
       <AddResourceDrawer

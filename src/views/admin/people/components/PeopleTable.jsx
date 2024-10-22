@@ -7,6 +7,9 @@ import Spinner from "./Spinner";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import UpdateDrawer from "./UpdateDrawer";
 import AddDrawer from "./AddDrawer";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
 
 const PeopleTable = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -76,7 +79,7 @@ const PeopleTable = () => {
     businessNameProofUrl: "",
     bankStatementFolderUrl: "",
     invoiceFolderUrl: "",
-    form16FolderUrl: ""
+    form16FolderUrl: "",
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -90,10 +93,15 @@ const PeopleTable = () => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    const numericFields = ["hourlyRate", "tdsRate", "gstRate", "commissionOnInvoice"];
+    const numericFields = [
+      "hourlyRate",
+      "tdsRate",
+      "gstRate",
+      "commissionOnInvoice",
+    ];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
-  
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: parsedValue,
@@ -102,59 +110,70 @@ const PeopleTable = () => {
 
   const handleUpdateChange = (event) => {
     const { name, value } = event.target;
-    const numericFields = ["hourlyRate", "tdsRate", "gstRate", "commissionOnInvoice"];
+    const numericFields = [
+      "hourlyRate",
+      "tdsRate",
+      "gstRate",
+      "commissionOnInvoice",
+    ];
     const shouldParse = numericFields.includes(name) && value !== "";
     const parsedValue = shouldParse ? parseFloat(value) || "" : value;
-  
+
     setIdData((prevIdData) => ({
       ...prevIdData,
       [name]: parsedValue,
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log("cccc",formData);
-    
-    fetch(`${process.env.REACT_APP_API_URL}/people/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+    console.log("cccc", formData);
+
+    try {
+      // Make a POST request using axios
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/people/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          withCredentials: true, // Optional: include this if you need to send credentials
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Success:", data);
-        setIsDrawerOpen(false);
-        setSubmitted((prevSubmitted) => !prevSubmitted);
-        setSpin(false);
-        setFormData(initialFormData);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      );
+
+      console.log("Success:", response.data);
+      setIsDrawerOpen(false);
+      setSubmitted((prevSubmitted) => !prevSubmitted);
+      setSpin(false);
+      setFormData(initialFormData); // Resetting form data after submission
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  const fetchPeopleData = async () => {
+    try {
+      // Make a GET request using axios
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/people/getPeople`,
+        {
+          params: { sort: sortBy },
+        }
+      );
+
+      // Access the people data from the response
+      setPeopleData(response.data.data.people);
+      setSpin(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   useEffect(() => {
     setSpin(true);
-
-    fetch(`${process.env.REACT_APP_API_URL}/people/?sort=${sortBy}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        setPeopleData(data.data.people);
-        setSpin(false);
-        // setPeopleData((prevData) => [...data.data.people, ...prevData]);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+    fetchPeopleData();
   }, [deleted, submitted, updated, sortBy]);
 
   const handleDeleteRow = (id) => {
@@ -259,7 +278,7 @@ const PeopleTable = () => {
   const sendUpdate = (event) => {
     setSpin(true);
     event.preventDefault();
-    
+
     fetch(`${process.env.REACT_APP_API_URL}/people/${selectedId}`, {
       method: "PUT",
       headers: {
@@ -378,7 +397,7 @@ const PeopleTable = () => {
           {/* Add New Person */}
         </div>
         {showModal && (
-          <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+          <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center">
             <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
             <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
               <DeletePeopleConfirm
@@ -473,7 +492,7 @@ const PeopleTable = () => {
       {spin && <Spinner />}
 
       {/* Pagination */}
-      <div className="mr-6 mb-4 flex justify-end">
+      <div className="mb-4 mr-6 flex justify-end">
         <Pagination
           itemsPerPage={itemsPerPage}
           totalItems={peopleData.length}

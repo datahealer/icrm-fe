@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaPen } from "react-icons/fa";
 import axios from "axios";
 
 import { useAuthContext } from "hooks/useAuthContext";
+
+axios.defaults.withCredentials = true;
 
 const ShowResourceDrawer = ({
   isDrawerOpen,
@@ -14,13 +16,7 @@ const ShowResourceDrawer = ({
   const user = useAuthContext();
   const getResources = async () => {
     const apiUrl = `${process.env.REACT_APP_API_URL}/project/${projectId}/get-project-resources`;
-    const authToken = user.token;
-    const response = await axios.get(apiUrl, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.get(apiUrl);
     console.log(response.data);
     setResourceList(response.data);
   };
@@ -75,9 +71,11 @@ const ShowResourceDrawer = ({
 
           <ul className="list-disc pl-5">
             {resourceList.map((resource, index) => (
-              <li key={index} className="text-gray-700 dark:text-gray-300">
-                {resource._id}{" "}
-                {/* Assuming each resource has a 'name' property */}
+              <li
+                key={index}
+                className="flex items-center gap-2 text-gray-700 dark:text-gray-300"
+              >
+                {resource.personId.displayName}{" "}
               </li>
             ))}
           </ul>

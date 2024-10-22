@@ -9,7 +9,11 @@ import AddDrawer from "./AddDrawer";
 import UpdateDrawer from "./UpdateDrawer";
 import AddResourceDrawer from "./resource/AddResourceDrawer";
 import { ResourceDrawer } from "./resource/AddResource";
+import axios from "axios";
+
 import { ListResource } from "./resource/ListResource";
+
+axios.defaults.withCredentials = true;
 
 const ProjectTable = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -65,7 +69,6 @@ const ProjectTable = () => {
     status: "In Progress",
     startDate: "",
     endDate: "",
-  
   });
 
   const handleResourceChange = (index, field, value) => {
@@ -104,7 +107,7 @@ const ProjectTable = () => {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     setSpin(true);
     event.preventDefault();
     if (
@@ -127,52 +130,52 @@ const ProjectTable = () => {
 
     console.log(formattedFormData);
 
-    fetch(`${process.env.REACT_APP_API_URL}/project`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-      body: JSON.stringify(formattedFormData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Success:", data);
-        setIsDrawerOpen(false);
-        setSubmitted((prevSubmitted) => !prevSubmitted);
-        setSpin(false);
-        setFormData({
-          name: "",
-          clientId: "",
-          managerId: "",
-          acquisitionPersonId: "",
-          status: "In Progress",
-          startDate: "",
-          endDate: "",
-        
-        });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
+    try {
+      // Send a POST request with axios
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/project`,
+        formattedFormData
+      );
+
+      // Handle the response
+      console.log("Success:", response.data);
+      setIsDrawerOpen(false); // Close the drawer
+      setSubmitted((prevSubmitted) => !prevSubmitted); // Toggle the submitted state
+      setSpin(false); // Stop the spinner
+
+      // Reset form data after submission
+      setFormData({
+        name: "",
+        clientId: "",
+        managerId: "",
+        acquisitionPersonId: "",
+        status: "In Progress",
+        startDate: "",
+        endDate: "",
       });
+    } catch (error) {
+      // Handle errors
+      console.error("Error:", error);
+    }
+  };
+
+  const fetchProjectData = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/project/?sort=${sortBy}`
+      );
+
+      setProjectData(response.data.data.projects);
+      setSpin(false); // Stop spinner
+    } catch (error) {
+      // Handle any errors
+      console.error("Error fetching data:", error);
+    }
   };
 
   useEffect(() => {
     setSpin(true);
-
-    fetch(`${process.env.REACT_APP_API_URL}/project/?sort=${sortBy}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        setProjectData(data.data.projects);
-        setSpin(false);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+    fetchProjectData();
   }, [deleted, submitted, updated, sortBy]);
 
   const handleDeleteRow = (id) => {
@@ -229,7 +232,6 @@ const ProjectTable = () => {
     status: "In Progress",
     startDate: "",
     endDate: "",
-   
   });
 
   const handleUpdateResourceChange = (index, field, value) => {
@@ -260,7 +262,6 @@ const ProjectTable = () => {
         status: data.status || "In Progress",
         startDate: data.startDate || "",
         endDate: data.endDate || "",
-     
       });
       setSelectedId(id);
     } catch (error) {
@@ -345,25 +346,26 @@ const ProjectTable = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/people/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setPeople(data.data.people);
+    // Make a request with axios withCredentials: true
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/people/getPeople`, {
+        withCredentials: true, // Include credentials like cookies
+      })
+      .then((response) => {
+        const peopleData = response.data.data.people;
 
-        setAcquisitionPeople(
-          data.data.people.filter((person) => person.department === "Sales")
-        );
+        // Update state with the received data
+        setPeople(peopleData);
+        setAcquisitionPeople(peopleData);
 
         setManagers(
-          data.data.people.filter(
-            (person) => person.department === "Engineering"
-          )
+          peopleData.filter((person) => person.peopleType === "PROJECT_MANAGER")
         );
       })
       .catch((error) => {
         console.error("Failed to fetch people", error);
       });
-  }, []);
+  }, []); // Empty dependency array to run this effect only once
 
   return (
     <div className="min-h-fit bg-white">
