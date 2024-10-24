@@ -267,7 +267,6 @@ export default function ClientTable() {
   const handleSubmit = (event) => {
     setSpin(true);
     event.preventDefault();
-    console.log(formData);
 
     // Send data to the API endpoint
     fetch(`${process.env.REACT_APP_API_URL}/client`, {
@@ -395,7 +394,6 @@ export default function ClientTable() {
     invoiceDisplayCurrencies: [],
   });
 
-  console.log(idData, "lsq");
 
   const handleUpdate = async (event, id) => {
     event.preventDefault();

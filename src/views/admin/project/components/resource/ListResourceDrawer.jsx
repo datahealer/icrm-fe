@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash, FaPen } from "react-icons/fa";
 import axios from "axios";
 
 import { useAuthContext } from "hooks/useAuthContext";
+import { EditResource } from "./EditResource";
 
 axios.defaults.withCredentials = true;
 
@@ -75,6 +76,11 @@ const ShowResourceDrawer = ({
                 key={index}
                 className="flex items-center gap-2 text-gray-700 dark:text-gray-300"
               >
+                <EditResource
+                  resource={resource}
+                  projectId={projectId}
+                  setResourceList={setResourceList}
+                />
                 {resource.personId.displayName}{" "}
               </li>
             ))}
