@@ -11,9 +11,10 @@ const ShowResourceDrawer = ({
   isDrawerOpen,
   handleDrawerToggle,
   drawerRef,
+  setResourceList,
+  resourceList,
   projectId,
 }) => {
-  const [resourceList, setResourceList] = useState([]);
   const user = useAuthContext();
   const getResources = async () => {
     const apiUrl = `${process.env.REACT_APP_API_URL}/project/${projectId}/get-project-resources`;
@@ -78,6 +79,7 @@ const ShowResourceDrawer = ({
               >
                 <EditResource
                   resource={resource}
+                  resourceList={resourceList}
                   projectId={projectId}
                   setResourceList={setResourceList}
                 />

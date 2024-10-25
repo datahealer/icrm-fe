@@ -9,7 +9,13 @@ import { useAuthContext } from "hooks/useAuthContext";
 
 axios.defaults.withCredentials = true;
 
-export const EditResource = ({ resource, projectId, setResourceList }) => {
+export const EditResource = ({
+  resource,
+  resourceList,
+
+  projectId,
+  setResourceList,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user } = useAuthContext();
   const [totalAllocation, setTotalAllocation] = useState(0);
@@ -72,6 +78,7 @@ export const EditResource = ({ resource, projectId, setResourceList }) => {
         handleDrawerToggle={handleDrawerToggle}
         resource={resource}
         projectId={projectId}
+        resourceList={resourceList}
         setIsDrawerOpen={setIsDrawerOpen}
         setResourceList={setResourceList}
         drawerRef={drawerRef}

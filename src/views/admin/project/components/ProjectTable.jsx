@@ -7,7 +7,6 @@ import Pagination from "./Pagination";
 import ObjectId from "bson-objectid";
 import AddDrawer from "./AddDrawer";
 import UpdateDrawer from "./UpdateDrawer";
-import AddResourceDrawer from "./resource/AddResourceDrawer";
 import { ResourceDrawer } from "./resource/AddResource";
 import axios from "axios";
 
@@ -22,6 +21,7 @@ const ProjectTable = () => {
   const [isUpdateDrawerOpen, setIsUpdateDrawerOpen] = useState(false);
   const { user } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [resourceList, setResourceList] = useState([]);
 
   const [projectData, setProjectData] = useState([]);
   const [deleted, setDeleted] = useState(false);
@@ -515,8 +515,16 @@ const ProjectTable = () => {
                         className="cursor-pointer text-lg text-red-500 hover:text-red-300"
                         onClick={(event) => handleDeleteClick(event, row._id)}
                       />
-                      <ResourceDrawer projectId={row._id} />
-                      <ListResource projectId={row._id} />
+                      <ResourceDrawer
+                        projectId={row._id}
+                        resourceList={resourceList}
+                        setResourceList={setResourceList}
+                      />
+                      <ListResource
+                        projectId={row._id}
+                        resourceList={resourceList}
+                        setResourceList={setResourceList}
+                      />
                     </div>
                   </td>
                 </tr>

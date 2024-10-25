@@ -7,7 +7,11 @@ import { useAuthContext } from "hooks/useAuthContext";
 
 axios.defaults.withCredentials = true;
 
-export const ResourceDrawer = ({ projectId }) => {
+export const ResourceDrawer = ({
+  projectId,
+  resourceList,
+  setResourceList,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user } = useAuthContext();
   const [totalAllocation, setTotalAllocation] = useState(0);
@@ -20,7 +24,7 @@ export const ResourceDrawer = ({ projectId }) => {
     endDate: "",
     acquisitionPersonId: "",
     billability: "Billable",
-    // shadowOf: "",
+    shadowOf: "",
     billingRate: null,
     billableHours: [],
     overtimeAllocations: [],
@@ -33,85 +37,6 @@ export const ResourceDrawer = ({ projectId }) => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
-  };
-
-  const handleInputChange = async (event) => {
-    const { name, value } = event.target;
-
-    if (name === "personId") {
-      try {
-        const apiUrl = `${process.env.REACT_APP_API_URL}/project/${value}/get-project-allocation`;
-        const authToken = user.token;
-        const response = await axios.get(apiUrl);
-        setTotalAllocation(response.data.totalAllocation);
-      } catch (error) {
-        console.error("Error fetching allocation:", error);
-      }
-    }
-    if (name === "defaultAllocation") {
-      const newAllocation = parseFloat(value) + totalAllocation;
-      if (newAllocation > 40) {
-        setWarning((prevError) => ({
-          ...prevError,
-          [name]: `Warning: Allocation Time exceeds by ${newAllocation - 40}`,
-        }));
-      }
-    }
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (
-      !formData.personId ||
-      !formData.defaultAllocation ||
-      !formData.startDate ||
-      !formData.endDate ||
-      !formData.acquisitionPersonId
-    ) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    const formattedFormData = {
-      ...formData,
-      startDate: writeDate(formData.startDate),
-      endDate: writeDate(formData.endDate),
-    };
-
-    console.log(formattedFormData);
-
-    axios
-      .post(
-        `${process.env.REACT_APP_API_URL}/project/${projectId}/create-project`,
-        formattedFormData
-      )
-      .then((response) => {
-        console.log("Success:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      })
-      .then((data) => {
-        console.log("Success:", data);
-        setIsDrawerOpen(false);
-
-        setFormData({
-          personId: "",
-          defaultAllocation: "",
-          startDate: "",
-          endDate: "",
-          acquisitionPersonId: "",
-          billability: "Billable",
-          billingRate: null,
-          billableHours: [],
-          overtimeAllocations: [],
-        });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
   };
 
   const drawerRef = useRef(null);
@@ -135,10 +60,11 @@ export const ResourceDrawer = ({ projectId }) => {
       <AddResourceDrawer
         isDrawerOpen={isDrawerOpen}
         handleDrawerToggle={handleDrawerToggle}
-        formData={formData}
-        handleInputChange={handleInputChange}
-        handleSubmit={handleSubmit}
+        setIsDrawerOpen={setIsDrawerOpen}
+        resourceList={resourceList}
+        setResourceList={setResourceList}
         drawerRef={drawerRef}
+        projectId={projectId}
         warning={warning}
       />
     </>

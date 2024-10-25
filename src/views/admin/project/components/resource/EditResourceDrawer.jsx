@@ -10,6 +10,7 @@ const EditResourceDrawer = ({
   handleDrawerToggle,
   setResourceList,
   resource,
+  resourceList,
   setIsDrawerOpen,
   projectId,
   warning,
@@ -21,6 +22,7 @@ const EditResourceDrawer = ({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
     control,
   } = useForm({
@@ -35,14 +37,9 @@ const EditResourceDrawer = ({
         : "",
       acquisitionPersonId: resource.acquisitionPersonId,
       billability: resource.billability,
-      // shadowOf: "",
+      shadowOf: undefined,
       billingRate: resource.billingRate,
-      billableHours: Array.isArray(resource?.billableHours)
-        ? resource.billableHours.map(({ week, hours }) => ({
-            week: week || 0,
-            hours: hours || 0,
-          }))
-        : [],
+
       overtimeAllocations: Array.isArray(resource?.overtimeAllocations)
         ? resource.overtimeAllocations.map(
             ({ startDate, endDate, hours, billingRate }) => ({
@@ -52,6 +49,7 @@ const EditResourceDrawer = ({
               endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
               hours: hours || 0,
               billingRate: billingRate || 0,
+              status: "ACTIVE",
             })
           )
         : [],
@@ -81,17 +79,26 @@ const EditResourceDrawer = ({
     const response = await axios.get(apiUrl);
     setResourceList(response.data);
   };
+  const billability = watch("billability");
 
   const onSubmit = (data) => {
     if (
       !data.personId ||
-      !data.defaultAllocation ||
       !data.startDate ||
       !data.endDate ||
       !data.acquisitionPersonId
     ) {
       alert("Please fill in all required fields.");
       return;
+    }
+
+    if (billability === "Shadow") {
+      delete data.defaultAllocation;
+      delete data.billingRate;
+      delete data.overTimeAllocation;
+    }
+    if (data.shadowOf === "") {
+      delete data.shadowOf;
     }
 
     const formattedFormData = {
@@ -196,34 +203,35 @@ const EditResourceDrawer = ({
                 <span className="text-red-500">This field is required</span>
               )}
             </div>
-
-            <div className="mx-auto mb-6">
-              <label
-                htmlFor="defaultAllocation"
-                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-              >
-                <span className="text-lg text-red-500">*</span>Default
-                Allocation
-              </label>
-              <select
-                id="defaultAllocation"
-                {...register("defaultAllocation", { required: true })}
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="">Choose a Default Allocation</option>
-                {[5, 10, 15, 20, 25, 30, 35, 40].map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-              {errors.defaultAllocation && (
-                <span className="text-red-500">This field is required</span>
-              )}
-              <span className="text-yellow-500">
-                {warning.defaultAllocation}
-              </span>
-            </div>
+            {watch("billability") !== "Shadow" && (
+              <div className="mx-auto mb-6">
+                <label
+                  htmlFor="defaultAllocation"
+                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  <span className="text-lg text-red-500">*</span>Default
+                  Allocation
+                </label>
+                <select
+                  id="defaultAllocation"
+                  {...register("defaultAllocation", { required: true })}
+                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Choose a Default Allocation</option>
+                  {[5, 10, 15, 20, 25, 30, 35, 40].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+                {errors.defaultAllocation && (
+                  <span className="text-red-500">This field is required</span>
+                )}
+                <span className="text-yellow-500">
+                  {warning.defaultAllocation}
+                </span>
+              </div>
+            )}
 
             <div className="mb-6">
               <label
@@ -305,78 +313,122 @@ const EditResourceDrawer = ({
               )}
             </div>
 
-            <div className="mb-6">
-              <label
-                htmlFor="billingRate"
-                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-              >
-                <span className="text-lg text-red-500">*</span>Billing Rate
-              </label>
-              <input
-                type="number"
-                id="billingRate"
-                {...register("billingRate", { required: true })}
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
-              {errors.billingRate && (
-                <span className="text-red-500">This field is required</span>
-              )}
-            </div>
+            {watch("billability") === "Shadow" && (
+              <div className="mb-6">
+                <label
+                  htmlFor="shadowOf"
+                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  <span className="text-lg text-red-500">*</span>
+                  Shadow Of
+                </label>
+                <select
+                  id="shadowOf"
+                  {...register("shadowOf", { required: true })}
+                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Choose a Resource</option>
+                  {resourceList.map((resource) => (
+                    <option key={resource._id} value={resource._id}>
+                      {resource.personId.displayName}
+                    </option>
+                  ))}
+                </select>
+                {errors.shadowOf && (
+                  <span className="text-red-500">This field is required</span>
+                )}
+              </div>
+            )}
 
-           
-            {overtimeFields.map((field, index) => (
-              
-              <div key={field.id} className="mb-2  items-center">
-                <div className="flex flex-col">
-                 <label className="mr-2">{`Overtime Allocation ${index + 1}`}</label>
-
-                <label className="mr-2">Start Date</label>
+            {watch("billability") !== "Shadow" && (
+              <div>
+                <div className="mb-6">
+                  <label
+                    htmlFor="billingRate"
+                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    <span className="text-lg text-red-500">*</span>Billing Rate
+                  </label>
+                  <input
+                    type="number"
+                    id="billingRate"
+                    {...register("billingRate", { required: true })}
+                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                  {errors.billingRate && (
+                    <span className="text-red-500">This field is required</span>
+                  )}
                 </div>
-                <input
-                  {...register(`overtimeAllocations.${index}.startDate`)}
-                  type="date"
-                  placeholder="Start Date"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
 
-                />
-                <label>End Date</label>
+                {overtimeFields.map((field, index) => (
+                  <div key={field.id} className="mb-2  items-center">
+                    <div className="flex flex-col">
+                      <label className="mr-2">{`Overtime Allocation ${
+                        index + 1
+                      }`}</label>
 
-                <input
-                  {...register(`overtimeAllocations.${index}.endDate`)}
-                  type="date"
-                  placeholder="End Date"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                      <label className="mr-2">Start Date</label>
+                    </div>
+                    <input
+                      {...register(`overtimeAllocations.${index}.startDate`)}
+                      type="date"
+                      placeholder="Start Date"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    />
+                    <label>End Date</label>
 
-                />
-                <label>Billing Hours</label>
-                
-                <input
-                  {...register(`overtimeAllocations.${index}.hours`)}
-                  type="number"
-                  placeholder="Hours"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    <input
+                      {...register(`overtimeAllocations.${index}.endDate`)}
+                      type="date"
+                      placeholder="End Date"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    />
+                    <label>Billing Hours</label>
 
-                  
-                />
-                <label>Billing Rate</label>
+                    <input
+                      {...register(`overtimeAllocations.${index}.hours`)}
+                      type="number"
+                      placeholder="Hours"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    />
+                    <label>Billing Rate</label>
 
-                <input
-                  {...register(`overtimeAllocations.${index}.billingRate`)}
-                  type="number"
-                  placeholder="Billing Rate"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    <input
+                      {...register(`overtimeAllocations.${index}.billingRate`)}
+                      type="number"
+                      placeholder="Billing Rate"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    />
 
-                />
+                    <input
+                      {...register(`overtimeAllocations.${index}.status`)}
+                      type="hidden"
+                      defaultValue="ACTIVE"
+                    />
 
-                
-                <button type="button" onClick={() => remove(index)}>
-                  Remove
+                    <button type="button" onClick={() => remove(index)}>
+                      Remove
+                    </button>
+                    <hr
+                      style={{ border: "1px solid black", margin: "10px 0" }}
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    append({
+                      startDate: "",
+                      endDate: "",
+                      hours: 0,
+                      billingRate: 0,
+                    })
+                  }
+                >
+                  Add Overtime Allocation
                 </button>
               </div>
-            ))}
-             <button type="button" onClick={() => append({ startDate: "", endDate: "", hours: 0, billingRate: 0 })}>
-              Add Overtime Allocation
-            </button>
+            )}
 
             <button
               type="submit"
