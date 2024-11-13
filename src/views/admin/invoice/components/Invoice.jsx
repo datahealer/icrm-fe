@@ -4,9 +4,9 @@ import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import numWords from "num-words";
 import axios from "axios";
 import { currency } from "constant/currency";
-import { useNavigate } from "react-router-dom";
 import { toWords } from "number-to-words";
-const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
+import { useNavigate } from "react-router-dom";
+const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   const formData = getValues();
 
   let sgstRate = 0;
@@ -15,6 +15,7 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   let sgstAmount = 0;
   let cgstAmount = 0;
   let igstAmount = 0;
+
   if (formData.business.gstTreatment === "OVERSEAS") {
     sgstRate = 0;
     cgstRate = 0;
@@ -28,6 +29,7 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
     cgstRate = 0;
     igstRate = 0.18;
   }
+
   const calculateAmount = (item) => {
     const rate = item.rate || 0;
     const hrs = item.hours || 0;
@@ -48,9 +50,8 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   const currentDue = currentCharges - (formData.amountReceived || 0);
 
   const totalAmountDue = Math.max(0, currentDue + (formData.previousDues || 0));
-  const conversionRate = currency.USD[formData.business.currency] || 1;
+  const conversionRate = currency.USD[formData.business.invoiceCurrency] || 1;
   const convertedAmount = totalAmountDue * conversionRate;
-  console.log(totalAmountDue, "djwi");
 
   const convertAmountToWords = (amount, currency) => {
     const words = toWords(amount);
@@ -65,8 +66,8 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   const formattedEndDate = moment(formData.project.endDate).format(
     "MMMM Do, YYYY"
   );
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const submitForm = async (values) => {
     console.log(peopleData, "sqjwih");
     const preparedBy = {
@@ -77,12 +78,12 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
       ...values,
       preparedBy,
       status: "FINALIZED",
-      doc: (values.doc || 0) + 1,
+      doc: 1,
       sgstAmount,
       cgstAmount,
       igstAmount,
-      sgstRate,
       cgstRate,
+      sgstRate,
       igstRate,
     };
     try {
@@ -181,7 +182,7 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           </p>
         </div>
 
-        <div className="text-right">Doc #: {formData.doc + 1}</div>
+        <div className="text-right">Doc #: 1</div>
       </div>
 
       {/* Invoice Items Table */}
@@ -213,16 +214,12 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
                 <td className="border p-2 text-center">
                   <div> {item.discountAmount} </div>
                   <div>
-                    ({" "}
-                    {(
-                      (item.discountAmount / (item.rate * item.hours)) *
-                      100
-                    ).toFixed(2)}
+                    ( {(item.discountAmount / (item.rate * item.hours)) * 100}
                     %)
                   </div>
                 </td>
                 <td className="border p-2 text-center">
-                  {item.rate * item.hrs - item.discountAmount}
+                  {item.rate * item.hours - item.discountAmount}
                 </td>
                 <td className="border p-2 text-center">
                   {" "}
@@ -273,18 +270,25 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="text-sm capitalize italic">{amountInWords}</p>
           {formData.business.invoiceCurrency !== "USD" && (
   <>
-    <p className="mt-2 font-bold">
-      Total Amount Due in {formData.business.invoiceCurrency}: {convertedAmount}
-    </p>
-    <p className="text-sm capitalize italic">
-      {convertAmountToWords(convertedAmount, formData.business.invoiceCurrency)}
-    </p>
+        {formData.business.invoiceCurrency !== "USD" && (
+            <>
+              <p className="mt-2 font-bold">
+                Total Amount Due in {formData.business.invoiceCurrency}
+                {convertedAmount}
+              </p>
+              <p className="text-sm capitalize italic">
+                {convertAmountToWords(
+                  convertedAmount,
+                  formData.business.invoiceCurrency
+                )}
+              </p>
+            </>
+          )}
   </>
 )}
 
         </div>
-
-        <p className="mt-2">signature & seal here</p>
+        <p>signature & seal here</p>
       </div>
       <div className="mt-8 flex justify-end">
         <button
@@ -298,4 +302,4 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   );
 };
 
-export default UpdateTaxInvoice;
+export default TaxInvoice;

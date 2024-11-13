@@ -22,12 +22,13 @@ export const useLogin = () => {
       }
     );
     const json = await response.json();
+    console.log(json, "jsqowisj")
 
     if (!response.ok) {
       const errorData = await response.json();
       setIsLoading(false);
       setError(errorData.error || "Login failed. Please try again.");
-      return;
+        return;
     }
 
     if (rememberMe) {

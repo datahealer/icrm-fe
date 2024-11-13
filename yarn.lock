@@ -4324,6 +4324,11 @@ country-list@^2.3.0:
   resolved "https://registry.yarnpkg.com/country-list/-/country-list-2.3.0.tgz#1e7ceaf9834c1d1210054301eabf4dc445ab978c"
   integrity sha512-qZk66RlmQm7fQjMYWku1AyjlKPogjPEorAZJG88owPExoPV8EsyCcuFLvO2afTXHEhi9liVOoyd+5A6ZS5QwaA==
 
+country-state-city@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/country-state-city/-/country-state-city-3.2.1.tgz#222f8b8bb5f4d3c0244a6e630f17c981b787ed80"
+  integrity sha512-kxbanqMc6izjhc/EHkGPCTabSPZ2G6eG4/97akAYHJUN4stzzFEvQPZoF8oXDQ+10gM/O/yUmISCR1ZVxyb6EA==
+
 cross-fetch@^3.1.5:
   version "3.1.8"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.8.tgz#0327eba65fd68a7d119f8fb2bf9334a1a7956f82"
@@ -7402,6 +7407,11 @@ jsonpointer@^5.0.0:
     object.assign "^4.1.4"
     object.values "^1.1.6"
 
+jwt-decode@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
+
 kareem@2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/kareem/-/kareem-2.6.3.tgz#23168ec8ffb6c1abfd31b7169a6fb1dd285992ac"
@@ -7954,6 +7964,16 @@ nth-check@^2.0.1:
   integrity sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==
   dependencies:
     boolbase "^1.0.0"
+
+num-words@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/num-words/-/num-words-1.2.3.tgz#f6c33b7cdf14f1b0c4198d1ab7bcf9da9a17116d"
+  integrity sha512-tfKqF8sCX1sb2LjrZyrqNF7SDyDzxcyKtpNlRqqaOTImmqTEclGYEs17FtpbXsuuyJijwOWzuTy+DasYf/FvlA==
+
+number-to-words@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/number-to-words/-/number-to-words-1.2.4.tgz#e0f124de9628f8d86c4eeb89bac6c07699264501"
+  integrity sha512-/fYevVkXRcyBiZDg6yzZbm0RuaD6i0qRfn8yr+6D0KgBMOndFPxuW10qCHpzs50nN8qKuv78k8MuotZhcVX6Pw==
 
 nwsapi@^2.2.0:
   version "2.2.13"
@@ -8990,6 +9010,11 @@ q@^1.1.2:
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
   integrity sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==
 
+qrcode.react@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/qrcode.react/-/qrcode.react-4.1.0.tgz#ff15dc9edb135f735bb303a8356938c1e8dcc4c8"
+  integrity sha512-uqXVIIVD/IPgWLYxbOczCNAQw80XCM/LulYDADF+g2xDsPj5OoRwSWtIS4jGyp295wyjKstfG1qIv/I2/rNWpQ==
+
 qs@6.13.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.13.0.tgz#6ca3bd58439f7e245655798997787b0d88a51906"
@@ -9279,10 +9304,10 @@ react-scripts@5.0.1:
   optionalDependencies:
     fsevents "^2.3.2"
 
-react-select@^5.8.1:
-  version "5.8.1"
-  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.8.1.tgz#3284a93b7633b5e893306b2a8007ea0f793e62b9"
-  integrity sha512-RT1CJmuc+ejqm5MPgzyZujqDskdvB9a9ZqrdnVLsvAHjJ3Tj0hELnLeVPQlmYdVKCdCpxanepl6z7R5KhXhWzg==
+react-select@^5.8.3:
+  version "5.8.3"
+  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.8.3.tgz#64e89ad20a846348b18c6fbb395b939d0153ed74"
+  integrity sha512-lVswnIq8/iTj1db7XCG74M/3fbGB6ZaluCzvwPGT5ZOjCdL/k0CLWhEK0vCBLuU5bHTEf6Gj8jtSvi+3v+tO1w==
   dependencies:
     "@babel/runtime" "^7.12.0"
     "@emotion/cache" "^11.4.0"
@@ -10536,6 +10561,11 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
+
+to-words@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/to-words/-/to-words-4.1.0.tgz#6f2229ea75990d22e6bfd80a52278415d88c2432"
+  integrity sha512-42GLFZQr/7i3sNiXJ7J83Kkw3hj8pWdTtj5kPjSWnyr1lkxmCnC2Dkx8JMttMAnQxj76ktyGpuDRsrxU5UeXpw==
 
 toggle-selection@^1.0.6:
   version "1.0.6"

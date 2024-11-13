@@ -518,7 +518,7 @@ const ProjectTable = () => {
                       <ResourceDrawer
                         projectId={row._id}
                         resourceList={resourceList}
-                        setResourceList={setResourceList}
+                        setResourceList={setResourceList}         
                       />
                       <ListResource
                         projectId={row._id}

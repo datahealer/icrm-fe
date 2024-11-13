@@ -4,6 +4,9 @@ import Navbar from "components/navbar";
 import Sidebar from "components/sidebar";
 import Footer from "components/footer/Footer";
 import routes from "routes.js";
+import TaxInvoiceForm from "views/admin/invoice/components/InvoiceForm";
+import TaxInvoice from "views/admin/invoice/components/Invoice";
+import UpdateTaxInvoiceForm from "views/admin/invoice/components/UpdateInvoiceForm";
 
 export default function Admin(props) {
   const { ...rest } = props;
@@ -77,6 +80,11 @@ export default function Admin(props) {
             />
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
+                <Route
+                  path={"/invoice/update"}
+                  element={<UpdateTaxInvoiceForm />}
+                />
+                <Route path={"/invoice/create"} element={<TaxInvoiceForm />} />
                 {getRoutes(routes)}
 
                 <Route

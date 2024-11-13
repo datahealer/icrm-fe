@@ -31,6 +31,8 @@ import {
 } from "react-icons/md";
 import { comment } from "postcss";
 import PurchaseInvoice from "views/admin/purchaseinvoice";
+import { layout } from "@chakra-ui/system";
+import TaxInvoiceForm from "views/admin/invoice/components/InvoiceForm";
 
 
 const routes = [
@@ -72,6 +74,7 @@ const routes = [
     icon: <MdAssignment className="h-6 w-6" />,
     component: <Invoice />,
   },
+ 
   {
     name: "Purchase Invoice",
     layout: "/admin",

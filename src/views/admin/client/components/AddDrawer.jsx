@@ -4,6 +4,7 @@ import { useAuthContext } from "hooks/useAuthContext";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { getNames, getCode } from "country-list";
+import { State } from "country-state-city";
 import { Select } from "@chakra-ui/react";
 import { components } from "react-select";
 import { placeData } from "../../../../constant/place.js";
@@ -35,6 +36,9 @@ const AddDrawer = ({
   const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuthContext();
   const countries = getNames();
+  const states = State.getStatesOfCountry(formData.country.toUpperCase());
+  console.log(states, "dwhis");
+  console.log(formData.country, "dwhis");
 
   const [people, setPeople] = useState([]);
   const [managerList, setManagerList] = useState([]);
@@ -43,6 +47,7 @@ const AddDrawer = ({
     try {
       const apiUrl = `${process.env.REACT_APP_API_URL}/people/getPeople`;
       const response = await axios.get(apiUrl);
+      console.log(response.data, "dwhish");
       setPeople(response.data.data.people);
     } catch (error) {
       console.log("Failed to fetch user list");
@@ -947,6 +952,30 @@ const AddDrawer = ({
                   );
                 })}
               </select>
+
+              {formData.country === "in" && (
+                <div className="mb-6">
+                  <label
+                    htmlFor="state"
+                    className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    <span className="text-lg text-red-500">*</span>State
+                  </label>
+                  <select
+                    id="state"
+                    name="state"
+                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    value={formData.state}
+                  >
+                    <option value="">Choose State</option>
+                    {states.map((state) => (
+                      <option key={state.code} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <button

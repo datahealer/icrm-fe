@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import CreateInvoice from "./CreateInvoice.jsx";
 import { useInvoiceContext } from "context/InvoiceContext";
+import TaxInvoice from "./Invoice";
+import TaxInvoiceForm from "./InvoiceForm";
 
 const InvoiceTable = () => {
   const [filter, setFilter] = useState("");
@@ -20,8 +22,6 @@ const InvoiceTable = () => {
   const [showComponent, setShowComponent] = useState(false);
   const [showUpdateComponent, setshowUpdateComponent] = useState(false);
 
-  const navigate = useNavigate();
-
   const toggleAccordion = () => {
     setIsOpencreate(!isOpencreate);
     setShowComponent(true);
@@ -30,8 +30,8 @@ const InvoiceTable = () => {
   // const handleAddNewInvoice = () => {
   //   navigate("/admin/createinvoice");
   // };
-  const { handleAddNewInvoice } = useInvoiceContext();  
-
+  const { handleAddNewInvoice } = useInvoiceContext();
+  const navigate = useNavigate();
 
   const [data, setData] = useState([
     { id: 1, task: "Task 1", completed: false },
@@ -49,7 +49,7 @@ const InvoiceTable = () => {
   const [submitted, setSubmitted] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [clients, setClients] = useState([]);
-  console.log("clientdev",clients )
+  console.log("clientdev", clients);
   const [projects, setProjects] = useState([]);
   const [people, setPeople] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -154,31 +154,30 @@ const InvoiceTable = () => {
     setIsOpen(false);
   };
 
-  const handleServiceChange = (index, field, value) => {
-    const updatedServices = formData.services.map((service, i) => {
-      if (i === index) {
-        return { ...service, [field]: value };
-      }
-      return service;
-    });
-    setFormData({ ...formData, services: updatedServices });
-  };
+  // const handleServiceChange = (index, field, value) => {
+  //   const updatedServices = formData.services.map((service, i) => {
+  //     if (i === index) {
+  //       return { ...service, [field]: value };
+  //     }
+  //     return service;
+  //   });
+  //   setFormData({ ...formData, services: updatedServices });
+  // };
 
-  const handleAdjustmentChange = (index, field, value) => {
-    const updatedAdjustements = formData.adjustments.map((adjustment, i) => {
-      if (i === index) {
-        return { ...adjustment, [field]: value };
-      }
-      return adjustment;
-    });
-    setFormData({ ...formData, adjustments: updatedAdjustements });
-  };
+  // const handleAdjustmentChange = (index, field, value) => {
+  //   const updatedAdjustements = formData.adjustments.map((adjustment, i) => {
+  //     if (i === index) {
+  //       return { ...adjustment, [field]: value };
+  //     }
+  //     return adjustment;
+  //   });
+  //   setFormData({ ...formData, adjustments: updatedAdjustements });
+  // };
 
   const handleDrawerToggle = () => {
     setIsDrawerOpen(!isDrawerOpen);
     setIsOpen(true);
   };
-
 
   const handleUpdateClickOutside = (event) => {
     if (updateRef.current && !updateRef.current.contains(event.target)) {
@@ -263,9 +262,7 @@ const InvoiceTable = () => {
       });
   };
 
-  useEffect(() => {
-    console.log("Heyy", formData);
-  });
+  useEffect(() => {});
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/client/`)
@@ -280,7 +277,7 @@ const InvoiceTable = () => {
       });
   }, []);
 
-  console.log("client ==>",clients)
+  console.log("client ==>", clients);
 
   useEffect(() => {
     setSpin(true);
@@ -290,7 +287,7 @@ const InvoiceTable = () => {
       .then((response) => response.json())
       .then((data) => {
         setInvoices(data.data.invoices);
-        console.log("dev. resp",data.data)
+        console.log("dev. resp", data.data);
         setSpin(false); // Assuming the API returns invoices in data.data.invoices
       })
       .catch((error) => {
@@ -448,37 +445,35 @@ const InvoiceTable = () => {
     event.preventDefault();
     await handleEditInvoice(id);
   };
-  
+
   useEffect(() => {
     setSpin(true);
 
-    fetch(`${process.env.REACT_APP_API_URL}/invoices/?sort=${sortBy}`)
+    fetch(`${process.env.REACT_APP_API_URL}/invoices/`)
       .then((response) => response.json())
       .then((data) => {
         console.log("Data Fetcehd from API: ");
         console.log(data);
-        setInvoiceData(data.data.invoice);
+        setInvoiceData(data.data.invoices);
         setSpin(false);
         // setPeopleData((prevData) => [...data.data.people, ...prevData]);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, [submitted, updated, sortBy]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = invoices.slice(indexOfFirstItem, indexOfLastItem);
-  const isCurrentPageEmpty = currentItems.length === 0 && currentPage > 1;
+  // const indexOfLastItem = currentPage * itemsPerPage;
+  // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  // const currentItems = invoices.slice(indexOfFirstItem, indexOfLastItem);
+  // const isCurrentPageEmpty = currentItems.length === 0 && currentPage > 1;
 
-  const newPage = isCurrentPageEmpty ? currentPage - 1 : currentPage;
+  // const newPage = isCurrentPageEmpty ? currentPage - 1 : currentPage;
 
-  const updatedIndexOfLastItem = newPage * itemsPerPage;
-  const updatedIndexOfFirstItem = updatedIndexOfLastItem - itemsPerPage;
-  const updatedCurrentItems = invoices.slice(
-    updatedIndexOfFirstItem,
-    updatedIndexOfLastItem
-  );
-
-
+  // const updatedIndexOfLastItem = newPage * itemsPerPage;
+  // const updatedIndexOfFirstItem = updatedIndexOfLastItem - itemsPerPage;
+  // const updatedCurrentItems = invoices.slice(
+  //   updatedIndexOfFirstItem,
+  //   updatedIndexOfLastItem
+  // );
 
   const drawerRef = useRef(null);
 
@@ -546,7 +541,7 @@ const InvoiceTable = () => {
   };
 
   useEffect(() => {
-    console.log("Heyy Priyanshu", formData,formData.clientName);
+    // console.log("Heyy Priyanshu", formData,formData.clientName);
   }, [formData]);
 
   return (
@@ -561,123 +556,27 @@ const InvoiceTable = () => {
               type="button"
             >
               {/* Icons and text here */}
-              <svg
-                className="h-3 w-3 text-gray-500 me-3 dark:text-gray-400"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
-              </svg>
               Recents
-              <svg
-                className="ml-2 h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
             </button>
           </div>
           <div className="flex flex-row justify-between gap-4">
-            <div className="relative">
-              <div className="rtl:inset-r-0 pointer-events-none absolute inset-y-0 left-0 flex items-center ps-3 rtl:right-0">
-                <svg
-                  className="h-5 w-5 text-gray-500 dark:text-gray-400"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-              </div>
-              <input
-                type="text"
-                id="table-search"
-                className="w-76 block rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                placeholder="Search for invoices"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            {/* add invoice */}
-            <div className="mx-auto  w-full max-w-4xl">
-              <button
-                id="dropdownRadioButton"
-                onClick={handleAddNewInvoice}
-                className="inline-flex items-center rounded-lg border border-gray-300 bg-blue-700 py-2 px-3 text-sm font-medium text-white hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                type="button"
-              >
-                ADD NEW INVOICE
-              </button>
-            </div>
-
-            {showComponent && <CreateInvoice />}
-
-            {/* Update Drawer */}
-            {/* <UpdateDrawer
-              isUpdateDrawerOpen={isUpdateDrawerOpen}onDataChange={handleDataChange}
-              updateRef={updateRef}
-              idData={idData}
-              handleUpdateDrawerToggle={handleUpdateDrawerToggle}
-              handleUpdateChange={handleUpdateChange}
-              handleServiceChange={handleServiceChange}
-              handleAdjustmentChange={handleAdjustmentChange}
-              sendUpdate={sendUpdate}
-              clients={clients}
-              managers={managers}
-              projects={projects}
-              selectedId={selectedId}
-            /> */}
+            <button
+              id="dropdownRadioButton"
+              onClick={() => {
+                navigate("/admin/invoice/create");
+              }}
+              className="inline-flex items-center rounded-lg border border-gray-300 bg-blue-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+              type="button"
+            >
+              Create New Invoice
+            </button>
           </div>
+          {/* Add New Person */}
         </div>
         {showModal && (
-          <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+          <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center">
             <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
-            <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-              <DeleteInvoiceConfirm
-                onClose={handleCloseModal}
-                onConfirm={handleConfirmDelete}
-              />
-            </div>
-          </div>
-        )}
-        {downloadModal && (
-          <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
-            <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
-            <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-              <DownloadInvoiceConfirm
-                onClose={handleCloseDownloadModal}
-                onConfirm={handleConfirmDownload}
-              />
-            </div>
-          </div>
-        )}
-        {downloadPdf && (
-          <div className="top-0 left-0 flex h-full w-full items-center justify-center">
-            <div className="absolute top-0 h-full w-full bg-gray-900 opacity-50"></div>
-            <div className="z-30 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-              <div className="my-16">
-                <PdfSkeleton
-                  onPrintComplete={handlePrintStatus}
-                  data={downloadData}
-                />
-              </div>
-            </div>
+            <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800"></div>
           </div>
         )}
         <table className="z-[-1]x w-full text-left text-sm text-gray-500 dark:text-gray-400">
@@ -687,117 +586,65 @@ const InvoiceTable = () => {
                 S.No.
               </th>
               <th scope="col" className="px-6 py-3">
-                Client name
+                Invoice Number
               </th>
               <th scope="col" className="px-6 py-3">
-                Project Name
+                Status
+              </th>
+              {/* <th scope="col" className="px-6 py-3">
+                Phone
               </th>
               <th scope="col" className="px-6 py-3">
-                Start Date
-              </th>
+                Email
+              </th> */}
               <th scope="col" className="px-6 py-3">
-                End Date
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Actions
+                Action
               </th>
             </tr>
           </thead>
           <tbody>
-            {updatedCurrentItems?.map((row, index) => {
-              {console.log("updatedCurrentItems",updatedCurrentItems)}
-              const client = clients?.find(
-                (client) => client?._id === row?.clientId
-              );
-
-              console.log("client.primaryContactPerson",client)
-              const primaryContactPerson = client
-                ? client?.primaryContactPerson
-                : "Unknown";
-
-              const project = projects.find(
-                (project) => project._id === row.projectId
-              );
-              const projectName = project ? project?.name : "Unknown";
-
-              console.log("project.name is",project?.name)
-
-              // Use clientName from formData
-              // const clientName = formData.clientName || primaryContactPerson;
-              // console.log("clientName is",primaryContactPerson)
-
-              if (
-                !searchQuery.trim() ||
-                primaryContactPerson
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                row.serviceFromDate
-                  ?.toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                row.serviceToDate
-                  ?.toLowerCase()
-                  .includes(searchQuery.toLowerCase())
-              ) {
-                return (
-                  <tr
-                    key={row.id}
-                    className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
-                  >
-                    <td className="w-4 p-4">
-                      {(newPage - 1) * itemsPerPage + index + 1}.
-                    </td>
-                    <th
-                      scope="row"
-                      className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
+            {invoiceData.map((row, index) => (
+              <tr
+                key={row._id}
+                className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
+              >
+                <td className="w-4 p-4">{index + 1}.</td>
+                <th className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+                  {/* {row.firstname+" "+row.lastname} */}
+                  {row.invoiceNumber}
+                </th>
+                <td className="px-6 py-4">{row.status}</td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-row items-center gap-3">
+                    <a
+                      href="#"
+                      className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                      onClick={() => {
+                        navigate("/admin/invoice/update", {
+                          state: { invoiceData: row },
+                        });
+                      }}
                     >
-                   {primaryContactPerson}
-                    </th>
-                    <td className="px-6 py-4">{projectName}</td>
-                    <td className="px-6 py-4">
-                      {writeDate(row.serviceFromDate)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {writeDate(row.serviceToDate)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-row items-center gap-3">
-                        <a
-                          href="#"
-                          className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-                          onClick={(event) => {
-                            handleUpdate(event, row._id);
-                          }}
-                        >
-                          Edit
-                        </a>
-                        <MdDelete
-                          className="cursor-pointer text-lg text-red-500 hover:text-red-300"
-                          onClick={(event) => handleDeleteClick(event, row._id)}
-                        />
-                        <MdDownload
-                          className="mt-1 cursor-pointer text-xl text-green-400 hover:text-green-300"
-                          onClick={(event) =>
-                            handleDownloadClick(event, row._id)
-                          }
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              }
-            })}
+                      Edit
+                    </a>
+                    <MdDelete
+                      className="cursor-pointer text-lg text-red-500 hover:text-red-300"
+                      // onClick={(event) => handleDeleteClick(event, row._id)}
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-
       {spin && <Spinner />}
 
       {/* Pagination */}
-      <div className="mr-6 mb-4 flex justify-end">
+      <div className="mb-4 mr-6 flex justify-end">
         <Pagination
           itemsPerPage={itemsPerPage}
-          totalItems={invoices.length}
+          // totalItems={peopleData.length}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />
