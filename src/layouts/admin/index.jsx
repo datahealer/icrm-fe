@@ -7,6 +7,7 @@ import routes from "routes.js";
 import TaxInvoiceForm from "views/admin/invoice/components/InvoiceForm";
 import TaxInvoice from "views/admin/invoice/components/Invoice";
 import UpdateTaxInvoiceForm from "views/admin/invoice/components/UpdateInvoiceForm";
+import ReviewInvoice from "views/admin/invoice/components/ReviewInvoice";
 
 export default function Admin(props) {
   const { ...rest } = props;
@@ -83,6 +84,10 @@ export default function Admin(props) {
                 <Route
                   path={"/invoice/update"}
                   element={<UpdateTaxInvoiceForm />}
+                />
+                <Route
+                  path={"/invoice/review-invoice"}
+                  element={<ReviewInvoice />}
                 />
                 <Route path={"/invoice/create"} element={<TaxInvoiceForm />} />
                 {getRoutes(routes)}

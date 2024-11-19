@@ -28,9 +28,7 @@ const TaxInvoiceForm = () => {
   const [projectData, setProjectData] = useState([]);
   const [showInvoice, setShowInvoice] = useState(false);
   const [peopleData, setPeopleData] = useState("");
-  const [reviewedBy, setReviewedBy] = useState([]);
 
-  const selectedReviewers = watch("selectedReviewers") || [];
 
   const onSubmit = (data) => {
     setShowInvoice(true);
@@ -85,18 +83,7 @@ const TaxInvoiceForm = () => {
     fetchPeopleData();
   }, []);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/people/getPeople`)
-      .then((response) => {
-        const peopleData = response.data.data.people;
-
-        setReviewedBy(peopleData);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch people", error);
-      });
-  }, []);
+ 
 
   const onSaveAsDraft = async () => {
     const draftData = getValues();
@@ -209,67 +196,10 @@ const TaxInvoiceForm = () => {
                 )}
               </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Reviewed By
-                </label>
-                <Controller
-                  name="selectedReviewers"
-                  control={control}
-                  defaultValue={[]} // Initial empty array for selected reviewers
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      multiple
-                      onChange={(e) => {
-                        const selectedOptions = Array.from(
-                          e.target.selectedOptions
-                        );
-
-                        // Create an array of selected objects with _id and displayName
-                        const newSelections = selectedOptions.map((option) => ({
-                          _id: option.value,
-                          displayName: option.text,
-                        }));
-
-                        // Combine the existing selections with the new ones, ensuring no duplicates
-                        const updatedSelections = [
-                          ...selectedReviewers.filter(
-                            (person) =>
-                              !newSelections.some(
-                                (newPerson) => newPerson._id === person._id
-                              )
-                          ),
-                          ...newSelections,
-                        ];
-
-                        // Update the form field value with the updated selections
-                        setValue("selectedReviewers", updatedSelections);
-                      }}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      {reviewedBy.map((person) => (
-                        <option key={person._id} value={person._id}>
-                          {person.displayName}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-              </div>
+            
 
               {/* Display the selected reviewers array for demonstration */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium">
-                  Selected Reviewers:
-                </label>
-                <span>
-                  {selectedReviewers
-                    .map((reviewer) => reviewer.displayName)
-                    .join(", ")}
-                </span>
-              </div>
-
+           
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Milestones

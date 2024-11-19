@@ -53,7 +53,8 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   const conversionRate = currency.USD[formData.business.invoiceCurrency] || 1;
   const convertedAmount = totalAmountDue * conversionRate;
 
-  const convertAmountToWords = (amount, currency) => {
+  const 
+  convertAmountToWords = (amount, currency) => {
     const words = toWords(amount);
     const formattedAmount = `${words} ${currency} Only`;
     return formattedAmount;
@@ -77,7 +78,7 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
     const payload = {
       ...values,
       preparedBy,
-      status: "FINALIZED",
+      status: "IN_REVIEW",
       doc: 1,
       sgstAmount,
       cgstAmount,
@@ -252,12 +253,7 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="text-sm">
             Date: {moment().utc().format("YYYY-MM-DD HH:mm:ss [UTC]")}
           </p>
-          <p className="text-sm">
-            Reviewed By:{" "}
-            {formData.selectedReviewers
-              .map((reviewer) => reviewer.displayName)
-              .join(", ")}
-          </p>
+      
         </div>
         <div className="text-right">
           <p className="text-sm">Current Charges: {currentCharges}</p>
@@ -270,20 +266,12 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="text-sm capitalize italic">{amountInWords}</p>
           {formData.business.invoiceCurrency !== "USD" && (
   <>
-        {formData.business.invoiceCurrency !== "USD" && (
-            <>
-              <p className="mt-2 font-bold">
-                Total Amount Due in {formData.business.invoiceCurrency}
-                {convertedAmount}
-              </p>
-              <p className="text-sm capitalize italic">
-                {convertAmountToWords(
-                  convertedAmount,
-                  formData.business.invoiceCurrency
-                )}
-              </p>
-            </>
-          )}
+    <p className="mt-2 font-bold">
+      Total Amount Due in {formData.business.invoiceCurrency}: {convertedAmount}
+    </p>
+    <p className="text-sm capitalize italic">
+      {convertAmountToWords(convertedAmount, formData.business.invoiceCurrency)}
+    </p>
   </>
 )}
 

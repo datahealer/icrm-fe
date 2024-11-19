@@ -12,6 +12,8 @@ import CreateInvoice from "./CreateInvoice.jsx";
 import { useInvoiceContext } from "context/InvoiceContext";
 import TaxInvoice from "./Invoice";
 import TaxInvoiceForm from "./InvoiceForm";
+import ReviewInvoice from "./ReviewInvoice";
+import axios from "axios";
 
 const InvoiceTable = () => {
   const [filter, setFilter] = useState("");
@@ -65,6 +67,7 @@ const InvoiceTable = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [downloadId, setDownloadId] = useState(null);
+
   const [downloadModal, setDownloadModal] = useState(false);
   const [downloadPdf, setDownloadPdf] = useState(false);
   const [isPrinted, setIsPrinted] = useState(false);
@@ -132,6 +135,12 @@ const InvoiceTable = () => {
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [showTaxInvoice, setShowTaxInvoice] = useState(false);
+
+  const handleViewClick = (event) => {
+    event.preventDefault();
+    setShowTaxInvoice(true); // Show the TaxInvoice component
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -152,6 +161,22 @@ const InvoiceTable = () => {
       })
     );
     setIsOpen(false);
+  };
+
+  const handleFinalize = async (invoiceId) => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/invoices/${invoiceId}`,
+        {
+          status: "FINALIZED",
+        },
+        {
+          withCredentials: true,
+        }
+      );
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+    }
   };
 
   // const handleServiceChange = (index, field, value) => {
@@ -261,8 +286,6 @@ const InvoiceTable = () => {
         console.error("Error:", error);
       });
   };
-
-  useEffect(() => {});
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/client/`)
@@ -615,23 +638,58 @@ const InvoiceTable = () => {
                 </th>
                 <td className="px-6 py-4">{row.status}</td>
                 <td className="px-6 py-4">
-                  <div className="flex flex-row items-center gap-3">
-                    <a
-                      href="#"
-                      className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-                      onClick={() => {
-                        navigate("/admin/invoice/update", {
-                          state: { invoiceData: row },
-                        });
-                      }}
-                    >
-                      Edit
-                    </a>
-                    <MdDelete
-                      className="cursor-pointer text-lg text-red-500 hover:text-red-300"
-                      // onClick={(event) => handleDeleteClick(event, row._id)}
-                    />
-                  </div>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-row items-center gap-3">
+                      {row.status === "IN_REVIEW" &&
+                      row.preparedBy.id !== user.user._id &&
+                      (user.user.userType === "FINANCE_MANAGER" ||
+                        user.user.userType === "ROOT") ? (
+                        <a
+                          href="#"
+                          className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                          onClick={() => {
+                            navigate("/admin/invoice/review-invoice", {
+                              state: { formData: row },
+                            });
+                          }}
+                        >
+                          Review
+                        </a>
+                      ) : row.status === "REVIEW_APPROVED" &&
+                        row.preparedBy.id === user.user._id ? (
+                        <button
+                          className="font-medium text-green-600 hover:underline dark:text-green-500"
+                          onClick={() => handleFinalize(row._id)}
+                        >
+                          Finalize
+                        </button>
+                      ) : row.status === "FINALIZED" ? (
+                        <button
+                          className="font-medium text-green-600 hover:underline dark:text-green-500"
+                          onClick={() => {
+                            navigate("/admin/invoice/review-invoice", {
+                              state: { formData: row },
+                            });
+                          }}
+                        >
+                          View
+                        </button>
+                      ) : (
+                        <a
+                          href="#"
+                          className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                          onClick={() => {
+                            navigate("/admin/invoice/update", {
+                              state: { invoiceData: row },
+                            });
+                          }}
+                        >
+                          Edit
+                        </a>
+                      )}
+                     
+                    </div>
+                  </td>
                 </td>
               </tr>
             ))}
