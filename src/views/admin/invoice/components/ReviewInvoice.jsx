@@ -169,7 +169,9 @@ const ReviewInvoice = () => {
         </div>
         <div className="text-right">
           <p className="text-sm">Invoice #: {formData?.invoiceNumber}</p>
-          <p className="text-sm">Invoice Date: {moment(formData?.invoiceDate).format("YYYY-MM-DD")}</p>
+          <p className="text-sm">
+            Invoice Date: {moment(formData?.invoiceDate).format("YYYY-MM-DD")}
+          </p>
           <p className="text-sm">
             Due Date: {moment(formData?.dueDate).format("YYYY-MM-DD")}
           </p>
@@ -211,9 +213,9 @@ const ReviewInvoice = () => {
           {formData?.paymentLink ? (
             <QRCodeSVG
               value={formData?.paymentLink}
-              size={100} // Set the QR code size
-              bgColor="#ffffff" // Background color
-              fgColor="#000000" // Foreground color
+              size={100}
+              bgColor="#ffffff"
+              fgColor="#000000"
             />
           ) : (
             <p className="text-sm">No payment link available</p>
@@ -265,14 +267,12 @@ const ReviewInvoice = () => {
                 <td className="border p-2 text-center">{item.hours}</td>
                 <td className="border p-2 text-center">{item.rate}</td>
                 <td className="border p-2 text-center">
-                 <div>
-                  <div>   
-                     {item.discountAmount } </div>
                   <div>
-                    ( {(item.discountAmount / (item.rate * item.hours)) * 100 }
-                    %)
-                  </div>
-                  
+                    <div>{item.discountAmount} </div>
+                    <div>
+                      ( {(item.discountAmount / (item.rate * item.hours)) * 100}
+                      %)
+                    </div>
                   </div>
                 </td>
                 <td className="border p-2 text-center">{item.taxableAmount}</td>
@@ -336,7 +336,9 @@ const ReviewInvoice = () => {
             Amount Received: {formData?.amountReceived || 0}
           </p>
           <p className="text-sm">Current Due: {currentDue}</p>
-          <p className="text-sm">Previous Dues: {formData?.previousDues || 0}</p>
+          <p className="text-sm">
+            Previous Dues: {formData?.previousDues || 0}
+          </p>
           <p className="font-bold">Total Amount Due in USD {totalAmountDue}</p>
           <p className="text-sm capitalize italic">{amountInWords}</p>
           {formData?.clientId?.invoiceCurrency !== "USD" && (
