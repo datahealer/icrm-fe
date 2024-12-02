@@ -42,6 +42,7 @@ const AddDrawer = ({
 
   const [people, setPeople] = useState([]);
   const [managerList, setManagerList] = useState([]);
+  const [accounts, setAccounts] = useState([]);
 
   const getUserList = async () => {
     try {
@@ -64,9 +65,27 @@ const AddDrawer = ({
     }
   };
 
+  const AccountList = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/account/`,
+        {
+          params: { type: "TREASURY" },
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      setAccounts(response.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   useEffect(() => {
     getUserList();
     getManagerList();
+    AccountList();
   }, []);
 
   return (
@@ -689,9 +708,11 @@ const AddDrawer = ({
                 required
               >
                 <option selected>Choose Receiving Account</option>
-                <option value="IOB_1173">IOB</option>
-                <option value="IDFC_3481">IDFC FIRST BANK</option>
-                <option value="ICIC_XXX">ICICI BANK</option>
+
+                {accounts.map((accounts) => (
+                  <option value={accounts._id}>{accounts.name}</option>
+                ))}
+                
               </select>
             </div>
             <div className="mx-auto mb-6">
