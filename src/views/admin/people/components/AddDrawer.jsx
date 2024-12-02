@@ -90,15 +90,50 @@ const AddDrawer = ({
                 required
               >
                 <option selected>Choose a department</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Sales">Sales</option>
-                <option value="OutsideInzint">Outside Inzint</option>
+                <option value="ENGINEERING">Engineering</option>
+                <option value="SALES">Sales</option>
+                <option value="OUTSIDEINZINT">Outside Inzint</option>
                 {/* <option value="Wise">Wise</option>
                       <option value="NEFT">NEFT</option>
                       <option value="Cheque">Cheque</option>
                       <option value="Cash">Cash</option> */}
               </select>
             </div>
+
+
+
+            <div className="mx-auto mb-6">
+              <label
+                htmlFor="peopleType"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span>Person Type
+              </label>
+              <select
+                id="peopleType"
+                name="peopleType"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                value={formData.peopleType}
+                onChange={handleInputChange}
+                required
+              >
+                <option selected>Choose Type</option>
+                <option value="ROOT">ROOT</option>
+                <option value="SALES_MANAGER">SALES_MANAGER</option>
+                <option value="HR">HR</option>
+                <option value="PROJECT_MANAGER">PROJECT_MANAGER</option>
+                <option value="CLIENT">CLIENT</option>
+                <option value="REFERRAL_PARTNER">REFERRAL_PARTNER</option>
+                <option value="FINANCE_MANAGER">FINANCE_MANAGER</option>
+                <option value="CONTRACTOR">CONTRACTOR</option>
+                  
+                {/* <option value="Wise">Wise</option>
+                      <option value="NEFT">NEFT</option>
+                      <option value="Cheque">Cheque</option>
+                      <option value="Cash">Cash</option> */}
+              </select>
+            </div>
+
 
             <div className="mb-6">
               <label
@@ -124,7 +159,7 @@ const AddDrawer = ({
                 htmlFor="email"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Email
+                <span className="text-lg text-red-500">*</span> WorkEmail
               </label>
               <input
                 type="email"
@@ -133,6 +168,25 @@ const AddDrawer = ({
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Your email"
                 value={formData.workEmail}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                <span className="text-lg text-red-500">*</span> Personal Email
+              </label>
+              <input
+                type="email"
+                id="personalEmail"
+                name="personalEmail"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                placeholder="Your email"
+                value={formData.personalEmail}
                 onChange={handleInputChange}
                 required
               />
@@ -352,13 +406,13 @@ const AddDrawer = ({
                 name="paymentChannel"
               >
                 <option selected>Choose a channel</option>
-                <option value="Domestic Bank Transfer">
+                <option value="DOMESTIC_BANK_TRANSFER">
                   Domestic Bank Transfer
                 </option>
-                <option value="International Bank Transfer">
+                <option value="INTERNATIONAL_BANK_TRANSFER">
                   International Bank Transfer
                 </option>
-                <option value="Via Third Party">Via Third Party</option>
+                <option value="VIA_THIRD_PARTY">Via Third Party</option>
               </select>
               {/* <input
                       type="text"
@@ -386,11 +440,11 @@ const AddDrawer = ({
                 name="paymentMode"
               >
                 <option selected>Choose a mode</option>
-                <option value="International Wire">International Wire</option>
-                <option value="Wise">Wise</option>
+                <option value="INTERNATIONAL_WIRE">International Wire</option>
+                <option value="WISE">Wise</option>
                 <option value="NEFT">NEFT</option>
-                <option value="Cheque">Cheque</option>
-                <option value="Cash">Cash</option>
+                <option value="CHEQUE">Cheque</option>
+                <option value="CASH">Cash</option>
               </select>
             </div>
             <div className="mb-6">
