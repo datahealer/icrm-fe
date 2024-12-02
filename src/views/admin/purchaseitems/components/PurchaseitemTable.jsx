@@ -142,15 +142,19 @@ const PurchaseitemTable = () => {
   };
 
   const submitForm = async (data) => {
-    await axios.post(
-      `${process.env.REACT_APP_API_URL}/purchaseItems/purchase-items`,
-      {
-        ...data,
-      },
-      {
-        withCredentials: true,
-      }
-    );
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/purchaseItems/purchase-items`,
+        {
+          ...data,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+    } catch (err) {
+      console.log(err.message);
+    }
   };
   useEffect(() => {
     getAllAssets();

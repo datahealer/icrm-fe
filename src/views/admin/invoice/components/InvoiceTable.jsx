@@ -179,6 +179,23 @@ const InvoiceTable = () => {
     }
   };
 
+  const handlePaid = async (invoiceId) => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/invoices/${invoiceId}`,
+        {
+          status: "AMOUNT_RECEIVED",
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      await fetchInvoices();
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+    }
+  };
+
   // const handleServiceChange = (index, field, value) => {
   //   const updatedServices = formData.services.map((service, i) => {
   //     if (i === index) {
@@ -302,20 +319,26 @@ const InvoiceTable = () => {
 
   console.log("client ==>", clients);
 
+  const fetchInvoices = async () => {
+    try {
+      setSpin(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/invoices`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      setInvoices(data.data.invoices);
+    } catch (error) {
+      console.error("Failed to fetch invoices", error);
+    } finally {
+      setSpin(false);
+    }
+  };
+
   useEffect(() => {
-    setSpin(true);
-    fetch(`${process.env.REACT_APP_API_URL}/invoices`, {
-      method: "GET",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setInvoices(data.data.invoices);
-        console.log("dev. resp", data.data);
-        setSpin(false); // Assuming the API returns invoices in data.data.invoices
-      })
-      .catch((error) => {
-        console.error("Failed to fetch invoices", error);
-      });
+    fetchInvoices();
   }, [deleted, submitted, updated]);
 
   useEffect(() => {
@@ -664,16 +687,24 @@ const InvoiceTable = () => {
                           Finalize
                         </button>
                       ) : row.status === "FINALIZED" ? (
-                        <button
-                          className="font-medium text-green-600 hover:underline dark:text-green-500"
-                          onClick={() => {
-                            navigate("/admin/invoice/review-invoice", {
-                              state: { formData: row },
-                            });
-                          }}
-                        >
-                          View
-                        </button>
+                        <div className="flex gap-4">
+                          <button
+                            className="font-medium text-green-600 hover:underline dark:text-green-500"
+                            onClick={() => {
+                              navigate("/admin/invoice/review-invoice", {
+                                state: { formData: row },
+                              });
+                            }}
+                          >
+                            View
+                          </button>
+                          <button
+                            className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                            onClick={() => handlePaid(row._id)}
+                          >
+                            Mark as Paid
+                          </button>
+                        </div>
                       ) : (
                         <a
                           href="#"
@@ -687,7 +718,6 @@ const InvoiceTable = () => {
                           Edit
                         </a>
                       )}
-                     
                     </div>
                   </td>
                 </td>

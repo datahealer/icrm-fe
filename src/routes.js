@@ -27,12 +27,15 @@ import {
   MdPerson,
   MdPeople,
   MdLock,
+  MdAccountCircle,
   MdAssignment,
+  MdAccountBalance,
 } from "react-icons/md";
 import { comment } from "postcss";
 import PurchaseInvoice from "views/admin/purchaseinvoice";
 import { layout } from "@chakra-ui/system";
 import TaxInvoiceForm from "views/admin/invoice/components/InvoiceForm";
+import Accounts from "views/admin/account";
 
 
 const routes = [
@@ -59,6 +62,16 @@ const routes = [
     // component: <NFTMarketplace />,
     // secondary: true,
   },
+
+  {
+    name: "Accounts",
+    layout: "/admin",
+    path: "account",
+    icon: <MdAccountBalance className="h-6 w-6" />,
+    component: <Accounts />,
+    // component: <NFTMarketplace />,
+    // secondary: true,
+  },
  
   {
     name: "Project",
@@ -67,6 +80,9 @@ const routes = [
     icon: <MdBarChart className="h-6 w-6" />,
     component: <Project />,
   },
+
+
+  
   {
     name: "Invoice",
     layout: "/admin",
