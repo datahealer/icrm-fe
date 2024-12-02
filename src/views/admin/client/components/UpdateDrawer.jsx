@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState} from "react";
+import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import PhoneInput from "react-phone-number-input";
 import { placeData } from "../../../../constant/place.js";
@@ -17,9 +17,6 @@ const options = [
   { value: "CAD", label: "CAD - Canadian Dollar" },
 ];
 
-
-
-
 const UpdateDrawer = ({
   isUpdateDrawerOpen,
   handleUpdateDrawerToggle,
@@ -29,10 +26,10 @@ const UpdateDrawer = ({
   sendUpdate,
   user,
   selectedId,
+  accounts,
 }) => {
   const updateRef = useRef(null);
   const countries = getNames();
-
 
   const handleClickOutsideUpdate = (event) => {
     if (updateRef.current && !updateRef.current.contains(event.target)) {
@@ -93,12 +90,12 @@ const UpdateDrawer = ({
         <div
           ref={updateRef}
           id="drawer-contact"
-          className="fixed top-0 right-0 z-40 h-screen w-80 -translate-x-0 overflow-y-auto bg-gray-100 p-4 transition-transform dark:bg-gray-800"
+          className="fixed right-0 top-0 z-40 h-screen w-80 -translate-x-0 overflow-y-auto bg-gray-100 p-4 transition-transform dark:bg-gray-800"
           tabIndex="-1"
         >
           <h5 className="mb-6 inline-flex items-center text-base font-semibold uppercase text-gray-500 dark:text-gray-400">
             <svg
-              className="h-4 w-4 me-2.5"
+              className="me-2.5 h-4 w-4"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -112,7 +109,7 @@ const UpdateDrawer = ({
           <button
             type="button"
             onClick={() => handleUpdateDrawerToggle(false)}
-            className="bg-transparent absolute top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-gray-400 end-2.5 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+            className="bg-transparent absolute end-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
           >
             <svg
               className="h-3 w-3"
@@ -194,7 +191,8 @@ const UpdateDrawer = ({
                 htmlFor="primaryContactPerson"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Primary Contact Person
+                <span className="text-lg text-red-500">*</span>Primary Contact
+                Person
               </label>
               <input
                 type="text"
@@ -321,7 +319,8 @@ const UpdateDrawer = ({
                 htmlFor="primaryContactNumber"
                 className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
               >
-                <span className="text-lg text-red-500">*</span>Primary Contact Number
+                <span className="text-lg text-red-500">*</span>Primary Contact
+                Number
               </label>
               <PhoneInput
                 type="phone"
@@ -590,7 +589,6 @@ const UpdateDrawer = ({
               </select>
             </div>
 
-           
             <div className="mx-auto mb-6">
               <label
                 htmlFor="paymentTerms"
@@ -652,7 +650,7 @@ const UpdateDrawer = ({
                 onChange={handleUpdateChange}
                 name="placeOfSupply"
                 required
-              > 
+              >
                 <option selected>Choose Place</option>
                 {placeData.map((place) => (
                   <option key={place.code} value={place.code}>
@@ -706,9 +704,10 @@ const UpdateDrawer = ({
                 required
               >
                 <option selected>Choose Receiving Account</option>
-                <option value="IOB_1173">IOB</option>
-                <option value="IDFC_3481">IDFC FIRST BANK</option>
-                <option value="ICIC_XXX">ICICI BANK</option>
+
+                {accounts.map((accounts) => (
+                  <option value={accounts._id}>{accounts.name}</option>
+                ))}
               </select>
             </div>
             <div className="mx-auto mb-6">

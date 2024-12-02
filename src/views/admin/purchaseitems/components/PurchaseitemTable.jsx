@@ -46,6 +46,7 @@ const PurchaseitemTable = () => {
   const [assets, setAssets] = useState([]);
   const [invoicePreviewUrl, setinvoicePreviewUrl] = useState("");
   const [people, setPeople] = useState([]);
+  const [accounts, setAccounts] = useState([]);
 
   const {
     register,
@@ -71,6 +72,19 @@ const PurchaseitemTable = () => {
       );
       console.log(response.data, "snbxiwbnx");
       setAssets(response.data.data.response);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  const AccountList = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/account/`,
+        {
+          withCredentials: true,
+        }
+      );
+      setAccounts(response.data.data);
     } catch (error) {
       console.log(error.message);
     }
@@ -159,6 +173,7 @@ const PurchaseitemTable = () => {
   useEffect(() => {
     getAllAssets();
     getUserList();
+    AccountList();
   }, []);
 
   return (

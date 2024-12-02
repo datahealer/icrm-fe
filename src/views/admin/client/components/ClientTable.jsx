@@ -26,6 +26,8 @@ export default function ClientTable() {
   const [itemsPerPage] = useState(5);
   const [spin, setSpin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+
 
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -64,7 +66,7 @@ export default function ClientTable() {
     billingCcEmail: "",
     password: "",
     primaryContactNumber: "",
-    ndaFolderUrl:"",
+    ndaFolderUrl: "",
     secondaryContactNumber: "",
     gstTreatment: "",
     gstin: "",
@@ -255,12 +257,8 @@ export default function ClientTable() {
           "Invalid name: Only letters, spaces, and hyphens are allowed."
         );
       }
-    } else
-    {
-
-    
-
-    setIdData({ ...idData, [name]: parsedValue });
+    } else {
+      setIdData({ ...idData, [name]: parsedValue });
     }
   };
 
@@ -339,6 +337,26 @@ export default function ClientTable() {
   };
 
   useEffect(() => {
+    AccountList();
+  }, []);
+
+  const AccountList = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/account/`,
+        {
+          params: { type: "TREASURY" },
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      setAccounts(response.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
     if (isDrawerOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -394,7 +412,6 @@ export default function ClientTable() {
     invoiceDisplayCurrencies: [],
   });
 
-
   const handleUpdate = async (event, id) => {
     event.preventDefault();
     try {
@@ -426,15 +443,11 @@ export default function ClientTable() {
         gstTreatment: data.data.client.gstTreatment || "",
         gstin: data.data.client.gstin || undefined,
         serviceStartDate: data.data.client.serviceStartDate
-          ? moment(data.data.client.serviceStartDate).format(
-              "YYYY-MM-DD"
-            )
+          ? moment(data.data.client.serviceStartDate).format("YYYY-MM-DD")
           : "",
         serviceEndDate: data.data.client.serviceStartDate
-        ? moment(data.data.client.serviceEndDate).format(
-            "YYYY-MM-DD"
-          )
-        : "",
+          ? moment(data.data.client.serviceEndDate).format("YYYY-MM-DD")
+          : "",
         placeOfSupply: data.data.client.placeOfSupply || "",
         taxPreference: data.data.client.taxPreference || "",
         paymentTerms: data.data.client.paymentTerms || "",
@@ -568,6 +581,7 @@ export default function ClientTable() {
               handleSubmit={handleSubmit}
               error={error}
               drawerRef={drawerRef}
+              accounts={accounts}
             />
 
             {/* Drawer ends */}
@@ -580,6 +594,8 @@ export default function ClientTable() {
               sendUpdate={sendUpdate}
               user={user}
               selectedId={selectedId}
+              accounts={accounts}
+
             />
             {/* Update Drawer ends */}
           </div>

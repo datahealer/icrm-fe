@@ -32,6 +32,7 @@ const AddDrawer = ({
   handleInputChange,
   handleSubmit,
   drawerRef,
+  accounts
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuthContext();
@@ -42,7 +43,6 @@ const AddDrawer = ({
 
   const [people, setPeople] = useState([]);
   const [managerList, setManagerList] = useState([]);
-  const [accounts, setAccounts] = useState([]);
 
   const getUserList = async () => {
     try {
@@ -65,27 +65,10 @@ const AddDrawer = ({
     }
   };
 
-  const AccountList = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/account/`,
-        {
-          params: { type: "TREASURY" },
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      setAccounts(response.data.data);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
+  
   useEffect(() => {
     getUserList();
     getManagerList();
-    AccountList();
   }, []);
 
   return (
