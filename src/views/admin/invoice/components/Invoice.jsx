@@ -53,8 +53,7 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
   const conversionRate = currency.USD[formData.business.invoiceCurrency] || 1;
   const convertedAmount = totalAmountDue * conversionRate;
 
-  const 
-  convertAmountToWords = (amount, currency) => {
+  const convertAmountToWords = (amount, currency) => {
     const words = toWords(amount);
     const formattedAmount = `${words} ${currency} Only`;
     return formattedAmount;
@@ -83,6 +82,7 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
       sgstAmount,
       cgstAmount,
       igstAmount,
+      totalAmountDue,
       cgstRate,
       sgstRate,
       igstRate,
@@ -253,7 +253,6 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="text-sm">
             Date: {moment().utc().format("YYYY-MM-DD HH:mm:ss [UTC]")}
           </p>
-      
         </div>
         <div className="text-right">
           <p className="text-sm">Current Charges: {currentCharges}</p>
@@ -265,16 +264,19 @@ const TaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="font-bold">Total Amount Due in USD {totalAmountDue}</p>
           <p className="text-sm capitalize italic">{amountInWords}</p>
           {formData.business.invoiceCurrency !== "USD" && (
-  <>
-    <p className="mt-2 font-bold">
-      Total Amount Due in {formData.business.invoiceCurrency}: {convertedAmount}
-    </p>
-    <p className="text-sm capitalize italic">
-      {convertAmountToWords(convertedAmount, formData.business.invoiceCurrency)}
-    </p>
-  </>
-)}
-
+            <>
+              <p className="mt-2 font-bold">
+                Total Amount Due in {formData.business.invoiceCurrency}:{" "}
+                {convertedAmount}
+              </p>
+              <p className="text-sm capitalize italic">
+                {convertAmountToWords(
+                  convertedAmount,
+                  formData.business.invoiceCurrency
+                )}
+              </p>
+            </>
+          )}
         </div>
         <p>signature & seal here</p>
       </div>

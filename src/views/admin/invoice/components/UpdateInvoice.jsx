@@ -47,7 +47,7 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
     }, 0) || 0;
   const currentDue = currentCharges - (formData.amountReceived || 0);
 
-  const totalAmountDue = Math.max(0, currentDue + (formData.previousDues || 0));
+  const totalAmountDue = formData?.project?.invoiceAmount || 0;
   const conversionRate = currency.USD[formData.business.currency] || 1;
   const convertedAmount = totalAmountDue * conversionRate;
   console.log(totalAmountDue, "djwi");
@@ -272,16 +272,19 @@ const UpdateTaxInvoice = ({ getValues, peopleData, handleSubmit }) => {
           <p className="font-bold">Total Amount Due in USD {totalAmountDue}</p>
           <p className="text-sm capitalize italic">{amountInWords}</p>
           {formData.business.invoiceCurrency !== "USD" && (
-  <>
-    <p className="mt-2 font-bold">
-      Total Amount Due in {formData.business.invoiceCurrency}: {convertedAmount}
-    </p>
-    <p className="text-sm capitalize italic">
-      {convertAmountToWords(convertedAmount, formData.business.invoiceCurrency)}
-    </p>
-  </>
-)}
-
+            <>
+              <p className="mt-2 font-bold">
+                Total Amount Due in {formData.business.invoiceCurrency}:{" "}
+                {convertedAmount}
+              </p>
+              <p className="text-sm capitalize italic">
+                {convertAmountToWords(
+                  convertedAmount,
+                  formData.business.invoiceCurrency
+                )}
+              </p>
+            </>
+          )}
         </div>
 
         <p className="mt-2">signature & seal here</p>

@@ -3,6 +3,8 @@ import WeeklyRevenue from "views/admin/default/components/WeeklyRevenue";
 import TotalSpent from "views/admin/default/components/TotalSpent";
 import PieChartCard from "views/admin/default/components/PieChartCard";
 import { IoMdHome } from "react-icons/io";
+import { currency } from "constant/currency";
+
 import { IoDocuments } from "react-icons/io5";
 import { MdBarChart, MdDashboard } from "react-icons/md";
 
@@ -15,8 +17,46 @@ import DailyTraffic from "views/admin/default/components/DailyTraffic";
 import TaskCard from "views/admin/default/components/TaskCard";
 import tableDataCheck from "./variables/tableDataCheck.json";
 import tableDataComplex from "./variables/tableDataComplex.json";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Dashboard = () => {
+  const [earnings, setEarnings] = useState(0);
+  const [expenses, setExpenses] = useState(0);
+
+  const getEarnings = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getEarnings`,
+        {
+          withCredentials: true,
+        }
+      );
+      setEarnings(response.data.totalEarnings);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const getExpenses = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getExpenses`,
+        {
+          withCredentials: true,
+        }
+      );
+      setExpenses(response.data.totalExpenses);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+  const totalExpenses = currency.USD["INR"];
+  const convertedExpenses = totalExpenses * expenses;
+  useEffect(() => {
+    getEarnings();
+    getExpenses();
+  }, []);
   return (
     <div>
       {/* Card widget */}
@@ -25,12 +65,13 @@ const Dashboard = () => {
         <Widget
           icon={<MdBarChart className="h-7 w-7" />}
           title={"Earnings"}
-          subtitle={"$340.5"}
+          subtitle={`$${earnings}`}
         />
         <Widget
           icon={<IoDocuments className="h-6 w-6" />}
           title={"Spend this month"}
-          subtitle={"$642.39"}
+          subtitle={`$${convertedExpenses}`}
+
         />
         <Widget
           icon={<MdBarChart className="h-7 w-7" />}
