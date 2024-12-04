@@ -76,6 +76,7 @@ const PurchaseitemTable = () => {
       console.log(error.message);
     }
   };
+
   const AccountList = async () => {
     try {
       const response = await axios.get(
@@ -439,14 +440,23 @@ const PurchaseitemTable = () => {
               <div>
                 <h3 className="mb-2 text-sm font-medium">Sales Acc.</h3>
                 <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Sales Account"
+                  <select
                     className="w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     {...register("salesAccount", {
                       required: "Sales Account is required",
                     })}
-                  />
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Sales Account
+                    </option>
+                    {accounts?.map((account) => (
+                      <option key={account._id} value={account._id}>
+                        {account.name}
+                      </option>
+                    ))}
+                  </select>
+
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -516,14 +526,22 @@ const PurchaseitemTable = () => {
               <div>
                 <h3 className="mb-2 text-sm font-medium">Purchase Acc.</h3>
                 <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Purchase Account"
+                <select
                     className="w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     {...register("purchaseAccount", {
                       required: "Purchase Account is required",
                     })}
-                  />
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Sales Account
+                    </option>
+                    {accounts?.map((account) => (
+                      <option key={account._id} value={account._id}>
+                        {account.name}
+                      </option>
+                    ))}
+                  </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

@@ -177,7 +177,7 @@ const UpdateDrawer = ({
               <option value="" disabled>
                 Choose Client
               </option>
-              {clients.map((client) => (
+              {clients?.map((client) => (
                 <option key={client._id} value={client._id}>
                   {client.primaryContactPerson}
                 </option>
@@ -202,7 +202,7 @@ const UpdateDrawer = ({
               <option value="" disabled>
                 Choose a Manager
               </option>
-              {managers.map((person) => (
+              {managers?.map((person) => (
                 <option key={person.id} value={person.id}>
                   {person.displayName}
                 </option>
@@ -228,7 +228,7 @@ const UpdateDrawer = ({
               <option value="" disabled>
                 Choose an Acquisition Person
               </option>
-              {acquisitionPeople.map((person) => (
+              {acquisitionPeople?.map((person) => (
                 <option key={person.id} value={person.displayName}>
                   {person.displayName}
                 </option>
@@ -239,7 +239,7 @@ const UpdateDrawer = ({
           <h5 className="mb-6 inline-flex items-center text-base font-semibold uppercase text-gray-500 dark:text-gray-400">
             Resources
           </h5>
-          {idData.resources.map((resource, index) => (
+          {idData?.resources?.map((resource, index) => (
             <div key={index}>
               <div className="mb-6">
                 <label
@@ -259,7 +259,7 @@ const UpdateDrawer = ({
                   required
                 >
                   <option value="">Choose a Person</option>
-                  {managers.map((person) => (
+                  {managers?.map((person) => (
                     <option key={person.id} value={person.id}>
                       {person.displayName}
                     </option>
@@ -290,7 +290,7 @@ const UpdateDrawer = ({
                   required
                 >
                   <option value="">Choose a Default Allocation</option>
-                  {[5, 10, 15, 20, 25, 30, 35, 40].map((value) => (
+                  {[5, 10, 15, 20, 25, 30, 35, 40]?.map((value) => (
                     <option key={value} value={value}>
                       {value}
                     </option>
@@ -393,7 +393,7 @@ const UpdateDrawer = ({
                   required
                 >
                   <option value="">Choose an Acquisition Person</option>
-                  {acquisitionPeople.map((person) => (
+                  {acquisitionPeople?.map((person) => (
                     <option key={person.id} value={person.id}>
                       {person.displayName}
                     </option>
@@ -424,7 +424,7 @@ const UpdateDrawer = ({
                   required
                 >
                   <option value="">Choose Billability</option>
-                  {["Billable", "Not Billable", "Shadow"].map((value) => (
+                  {["Billable", "Not Billable", "Shadow"]?.map((value) => (
                     <option key={value} value={value}>
                       {value}
                     </option>
