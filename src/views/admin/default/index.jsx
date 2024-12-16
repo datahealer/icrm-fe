@@ -19,10 +19,22 @@ import tableDataCheck from "./variables/tableDataCheck.json";
 import tableDataComplex from "./variables/tableDataComplex.json";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  FaBalanceScale,
+  FaChartLine,
+  FaFolderOpen,
+  FaUsers,
+} from "react-icons/fa";
 
 const Dashboard = () => {
   const [earnings, setEarnings] = useState(0);
   const [expenses, setExpenses] = useState(0);
+  const [clientCount, setClientCount] = useState(0);
+  const [projectCount, setProjectCount] = useState(0);
+  const [getSixMonthsData, setLastSixMonthsData] = useState(null);
+
+  const [balance, setBalance] = useState(0);
+  const [assetValuation, setAssetValuation] = useState(0);
 
   const getEarnings = async () => {
     try {
@@ -51,11 +63,73 @@ const Dashboard = () => {
       console.log(err.message);
     }
   };
+
+  const getProjectAndClientCount = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getProjectAndClientCount`,
+        {
+          withCredentials: true,
+        }
+      );
+      setClientCount(response.data.clientCount);
+      setProjectCount(response.data.projectCount);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const getBalance = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getBalance`,
+        {
+          withCredentials: true,
+        }
+      );
+      setBalance(response.data.data.balance);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const getAssetValuation = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getAssetValuation`,
+        {
+          withCredentials: true,
+        }
+      );
+      setAssetValuation(response.data.totalValuation);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const getLastSixMonthsData = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/dashboard/getLastSixMonthsData`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      setLastSixMonthsData(response.data.data);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
   const totalExpenses = currency.USD["INR"];
-  const convertedExpenses = totalExpenses * expenses;
+  const convertedExpenses = (expenses / totalExpenses).toFixed(2);
   useEffect(() => {
     getEarnings();
     getExpenses();
+    getProjectAndClientCount();
+    getBalance();
+    getAssetValuation();
+    getLastSixMonthsData();
   }, []);
   return (
     <div>
@@ -64,41 +138,40 @@ const Dashboard = () => {
       <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">
         <Widget
           icon={<MdBarChart className="h-7 w-7" />}
-          title={"Earnings"}
+          title={"Earnings this month"}
           subtitle={`$${earnings}`}
         />
         <Widget
           icon={<IoDocuments className="h-6 w-6" />}
-          title={"Spend this month"}
+          title={"Total Expenses"}
           subtitle={`$${convertedExpenses}`}
-
         />
         <Widget
-          icon={<MdBarChart className="h-7 w-7" />}
-          title={"Sales"}
-          subtitle={"$574.34"}
+          icon={<FaUsers className="h-7 w-7" />}
+          title={"Total Clients"}
+          subtitle={clientCount}
         />
         <Widget
-          icon={<MdDashboard className="h-6 w-6" />}
+          icon={<FaBalanceScale className="h-6 w-6" />}
           title={"Your Balance"}
-          subtitle={"$1,000"}
+          subtitle={`$${balance}`}
         />
         <Widget
-          icon={<MdBarChart className="h-7 w-7" />}
-          title={"New Tasks"}
-          subtitle={"145"}
+          icon={<FaChartLine className="h-7 w-7" />}
+          title={"Asset Valuation"}
+          subtitle={`$${assetValuation}`}
         />
         <Widget
-          icon={<IoMdHome className="h-6 w-6" />}
+          icon={<FaFolderOpen className="h-6 w-6" />}
           title={"Total Projects"}
-          subtitle={"$2433"}
+          subtitle={projectCount}
         />
       </div>
 
       {/* Charts */}
 
       <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <TotalSpent />
+        <TotalSpent getSixMonthsData={getSixMonthsData}  convertedExpenses ={convertedExpenses}/>
         <WeeklyRevenue />
       </div>
 

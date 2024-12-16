@@ -5,6 +5,18 @@ export const barChartDataDailyTraffic = [
   },
 ];
 
+
+function getLastSixMonths() {
+  const months = [];
+  const date = new Date();
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+    months.push(d.toLocaleString("default", { month: "short" }).toUpperCase());
+  }
+
+  return months;
+}
 export const barChartOptionsDailyTraffic = {
   chart: {
     toolbar: {
@@ -322,7 +334,7 @@ export const lineChartOptionsTotalSpent = {
     },
     type: "text",
     range: undefined,
-    categories: ["SEP", "OCT", "NOV", "DEC", "JAN", "FEB"],
+    categories: getLastSixMonths(),
   },
 
   yaxis: {
