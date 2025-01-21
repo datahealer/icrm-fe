@@ -87,7 +87,7 @@ const PurchaseItemTable = () => {
                     {item.description}
                   </td>
                   <td className="whitespace-nowrap border-b border-gray-200 px-6 py-4">
-                    {item.salesAccount}
+                    {item?.salesAccount?.name}
                   </td>
                   <td className="whitespace-nowrap border-b border-gray-200 px-6 py-4">
                     {item.tax}

@@ -102,7 +102,7 @@ const CreateInvoice = () => {
       const data = response.json();
       console.log("Fetch ClientName When projectId is selected", data);
     } catch (error) {}
-  });
+  }, []);
 
   const fetchClientName = async (projectId) => {
     console.log("Fetch ClientName When projectId is selected", projectId);
@@ -162,7 +162,7 @@ const CreateInvoice = () => {
 
   useEffect(() => {
     console.log("Projects Create invoice", projects);
-  });
+  }, []);
 
   // Invoice Drawer
   const data = ["Apple", "Banana"];
