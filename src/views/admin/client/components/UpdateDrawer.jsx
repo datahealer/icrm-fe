@@ -66,7 +66,6 @@ const UpdateDrawer = ({
           "Content-Type": "application/json",
         },
       });
-      console.log(response);
       setManagerList(response.data.managers);
     } catch (error) {
       console.log("Failed to fetch user list");
@@ -494,7 +493,7 @@ const UpdateDrawer = ({
                   name="gstin"
                   className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                   placeholder="Enter your Gst Number"
-                  value={idData.gstin}
+                  value={idData?.gstin}
                   onChange={handleUpdateChange}
                   required
                 />

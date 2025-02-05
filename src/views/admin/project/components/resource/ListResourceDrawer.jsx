@@ -83,7 +83,7 @@ const ShowResourceDrawer = ({
                   projectId={projectId}
                   setResourceList={setResourceList}
                 />
-                {resource.personId.displayName}{" "}
+                {resource?.personId?.displayName}{" "}
               </li>
             ))}
           </ul>

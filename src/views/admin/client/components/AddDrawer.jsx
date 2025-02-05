@@ -28,6 +28,7 @@ const AddDrawer = ({
   isDrawerOpen,
   handleDrawerToggle,
   error,
+  managerList,
   formData,
   handleInputChange,
   handleSubmit,
@@ -42,7 +43,6 @@ const AddDrawer = ({
   console.log(formData.country, "dwhis");
 
   const [people, setPeople] = useState([]);
-  const [managerList, setManagerList] = useState([]);
 
   const getUserList = async () => {
     try {
@@ -55,20 +55,10 @@ const AddDrawer = ({
     }
   };
 
-  const getManagerList = async () => {
-    try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/people/getManagers`;
-      const response = await axios.get(apiUrl);
-      setManagerList(response.data.data.managers);
-    } catch (error) {
-      console.log("Failed to fetch user list");
-    }
-  };
-
+  
   
   useEffect(() => {
     getUserList();
-    getManagerList();
   }, []);
 
   return (

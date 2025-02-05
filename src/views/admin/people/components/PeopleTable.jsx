@@ -140,7 +140,7 @@ const PeopleTable = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
-          withCredentials: true, // Optional: include this if you need to send credentials
+          withCredentials: true, 
         }
       );
 

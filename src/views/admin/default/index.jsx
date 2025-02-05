@@ -115,6 +115,7 @@ const Dashboard = () => {
           withCredentials: true,
         }
       );
+      console.log(response.data.data)
 
       setLastSixMonthsData(response.data.data);
     } catch (err) {

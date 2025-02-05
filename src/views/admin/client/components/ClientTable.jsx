@@ -16,6 +16,8 @@ export default function ClientTable() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isUpdateDrawerOpen, setIsUpdateDrawerOpen] = useState(false);
   const { user } = useAuthContext();
+  const [managerList, setManagerList] = useState([]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [clientData, setClientData] = useState([]);
   const [error, setError] = useState({});
@@ -52,6 +54,17 @@ export default function ClientTable() {
     setShowModal(false);
     setDeleteId(null);
   };
+
+  const getManagerList = async () => {
+      try {
+        const apiUrl = `${process.env.REACT_APP_API_URL}/people/getManagers`;
+        const response = await axios.get(apiUrl);
+        setManagerList(response.data.data.managers);
+      } catch (error) {
+        console.log("Failed to fetch user list");
+      }
+    };
+  
 
   const [formData, setFormData] = useState({
     primaryContactPerson: "",
@@ -338,6 +351,7 @@ export default function ClientTable() {
 
   useEffect(() => {
     AccountList();
+    getManagerList();
   }, []);
 
   const AccountList = async () => {
@@ -373,44 +387,7 @@ export default function ClientTable() {
 
   const [selectedId, setSelectedId] = useState(null);
 
-  const [idData, setIdData] = useState({
-    primaryContactPerson: "",
-    serviceAgreementFolderUrl: "",
-    ndaFolderUrl: "",
-    acquisitionPersonId: "",
-    manager: "",
-    l2ContactPerson: "",
-    billingContactPerson: "",
-    businessName: "",
-    displayName: "",
-    billingToEmail: "",
-    billingCcEmail: "",
-    password: "",
-    primaryContactNumber: "",
-    secondaryContactNumber: "",
-    gstTreatment: "",
-    gstin: undefined,
-    serviceStartDate: "",
-    serviceEndDate: "",
-    placeOfSupply: "",
-    taxPreference: "",
-    paymentTerms: "",
-    currency: "USD",
-    openingBalance: 0,
-    address: "",
-    sowFolderUrl: "",
-    country: "",
-    nestedFields: [],
-    paymentChannel: "",
-    receivingAccount: "",
-    receivingCurrency: "",
-    invoiceCurrency: "",
-    invoiceFrequency: "",
-    invoicePrefix: "",
-    invoiceDelivery: "",
-    invoiceFollowupPlan: "",
-    invoiceDisplayCurrencies: [],
-  });
+  const [idData, setIdData] = useState({});
 
   const handleUpdate = async (event, id) => {
     event.preventDefault();
@@ -423,7 +400,6 @@ export default function ClientTable() {
       }
       const data = await response.json();
       console.log(data);
-
       setIdData({
         primaryContactPerson: data.data.client.primaryContactPerson || "",
         serviceAgreementFolderUrl:
@@ -441,7 +417,7 @@ export default function ClientTable() {
         primaryContactNumber: data.data.client.primaryContactNumber || "",
         secondaryContactNumber: data.data.client.secondaryContactNumber || "",
         gstTreatment: data.data.client.gstTreatment || "",
-        gstin: data.data.client.gstin || undefined,
+        gstin: data?.data?.client?.gstin || undefined,
         serviceStartDate: data.data.client.serviceStartDate
           ? moment(data.data.client.serviceStartDate).format("YYYY-MM-DD")
           : "",
@@ -579,6 +555,7 @@ export default function ClientTable() {
               formData={formData}
               handleInputChange={handleInputChange}
               handleSubmit={handleSubmit}
+              managerList={managerList}
               error={error}
               drawerRef={drawerRef}
               accounts={accounts}
